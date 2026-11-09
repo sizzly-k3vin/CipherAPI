@@ -1,101 +1,188 @@
-#include <iostream>
-#include <cstring>
-#include <unistd.h>
+#include "library.hpp"
+#include "logger.hpp"
+#include "transport.hpp"
+#include "neon.hpp"
+
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <unistd.h>
+#include <atomic>
+#include <chrono>
+#include <cerrno>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <thread>
 
-namespace UI {
-    constexpr const char* RESET  = "\033[0m";
-    constexpr const char* CYAN   = "\033[36m";
-    constexpr const char* GREEN  = "\033[32m";
-    constexpr const char* RED    = "\033[31m";
-    constexpr const char* YELLOW = "\033[33m";
-    constexpr const char* BOLD   = "\033[1m";
-}
+constexpr uint16_t PORT = 8080;
 
-void banner() {
-    std::cout << UI::CYAN << UI::BOLD;
-    std::cout << R"(   _______       __              ___    ____  ____
-  / ____(_)___  / /_  ___  _____/   |  / __ \/  _/
- / /   / / __ \/ __ \/ _ \/ ___/ /| | / /_/ // /
-/ /___/ / /_/ / / / /  __/ /  / ___ |/ ____// /
-\____/_/ .___/_/ /_/\___/_/  /_/  |_/_/   /___/
-      /_/
-)";
-    std::cout << UI::RESET;
-    std::cout << UI::YELLOW << "          CipherAPI SERVER v0.3\n";
-    std::cout << "          =====================\n" << UI::RESET;
+static void transmit(int fd, LibraryManager& libraries,
+                     Neon::Stats& stats, const std::string& message) {
+    const auto start = std::chrono::steady_clock::now();
+    std::string encoded = libraries.encode(message);
+    const auto end = std::chrono::steady_clock::now();
+
+    const double ms =
+        std::chrono::duration<double, std::milli>(end - start).count();
+
+    Neon::encode(
+        std::to_string(message.size()) + " chars | " +
+        std::to_string(encoded.size() / 64) + " tokens | " +
+        std::to_string(encoded.size()) + " bytes | " +
+        std::to_string(ms) + " ms"
+    );
+
+    CipherTransport::send_frame(fd, encoded);
+
+    ++stats.sent_messages;
+    stats.sent_chars += message.size();
+    stats.sent_tokens += encoded.size() / 64;
+    stats.sent_bytes += encoded.size();
+
+    Neon::send("Frame transmitted successfully");
 }
 
 int main() {
-    banner();
+    int server = -1;
 
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0) {
-        std::cerr << UI::RED << "[ERROR] Socket creation failed\n" << UI::RESET;
-        perror("socket");
-        return 1;
-    }
+    try {
+        Neon::banner("SERVER");
+        LibraryManager libraries("libraries");
+        Neon::info("Translation engine initialized");
 
-    int opt = 1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+        server = socket(AF_INET, SOCK_STREAM, 0);
+        if (server < 0) throw std::runtime_error("Socket creation failed");
 
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(8080);
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        int reuse = 1;
+        setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
-    if (bind(server_fd, (sockaddr*)&addr, sizeof(addr)) < 0) {
-        std::cerr << UI::RED << "[ERROR] Port 8080 unavailable\n" << UI::RESET;
-        perror("bind");
-        close(server_fd);
-        return 1;
-    }
+        sockaddr_in address{};
+        address.sin_family = AF_INET;
+        address.sin_port = htons(PORT);
+        address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    if (listen(server_fd, 5) < 0) {
-        perror("listen");
-        close(server_fd);
-        return 1;
-    }
+        if (bind(server, reinterpret_cast<sockaddr*>(&address),
+                 sizeof(address)) < 0)
+            throw std::runtime_error("Bind failed");
 
-    std::cout << UI::GREEN << "[+] Socket initialized\n";
-    std::cout << "[+] Listening on 127.0.0.1:8080\n";
-    std::cout << "[+] Status: ONLINE\n" << UI::RESET;
-    std::cout << "-------------------------------------\n";
+        if (listen(server, 5) < 0)
+            throw std::runtime_error("Listen failed");
 
-    while (true) {
-        int client = accept(server_fd, nullptr, nullptr);
-        if (client < 0) {
-            perror("accept");
-            continue;
+        Neon::network("Listening on 127.0.0.1:8080");
+
+        while (true) {
+            int client = accept(server, nullptr, nullptr);
+
+            if (client < 0) {
+                if (errno == EINTR) continue;
+                throw std::runtime_error("Accept failed");
+            }
+
+            Neon::network("Client connected");
+            Neon::info("Full-duplex session started");
+            Neon::show_help_hint();
+
+            Neon::Stats stats;
+            std::atomic<bool> connected{true};
+
+            std::thread receiver([&]() {
+                try {
+                    std::string encoded;
+
+                    while (connected &&
+                           CipherTransport::receive_frame(client, encoded)) {
+                        stats.received_bytes += encoded.size();
+                        stats.received_tokens += encoded.size() / 64;
+
+                        Neon::receive(
+                            std::to_string(encoded.size()) + " bytes | " +
+                            std::to_string(encoded.size() / 64) + " tokens"
+                        );
+
+                        const auto start = std::chrono::steady_clock::now();
+                        std::string message = libraries.decode(encoded);
+                        const auto end = std::chrono::steady_clock::now();
+
+                        const double ms =
+                            std::chrono::duration<double, std::milli>(
+                                end - start).count();
+
+                        ++stats.received_messages;
+                        stats.received_chars += message.size();
+
+                        Neon::decode(
+                            std::to_string(encoded.size() / 64) +
+                            " tokens -> " + std::to_string(message.size()) +
+                            " chars | " + std::to_string(ms) + " ms"
+                        );
+
+                        Neon::print_message("CLIENT", message);
+
+                        if (message == "/quit") {
+                            connected = false;
+                            shutdown(client, SHUT_RDWR);
+                            break;
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    if (connected) Neon::error(e.what());
+                }
+
+                connected = false;
+                shutdown(client, SHUT_RDWR);
+                Neon::network("Client receive channel closed");
+            });
+
+            std::string message;
+
+            while (connected) {
+                Neon::prompt("SERVER");
+
+                if (!std::getline(std::cin, message)) {
+                    connected = false;
+                    shutdown(client, SHUT_RDWR);
+                    break;
+                }
+
+                if (message == "/help") {
+                    Neon::help();
+                    continue;
+                }
+                if (message == "/stats") {
+                    Neon::show_stats(stats);
+                    continue;
+                }
+                if (message == "/clear") {
+                    Neon::clear();
+                    continue;
+                }
+
+                if (!connected) break;
+
+                transmit(client, libraries, stats, message);
+
+                if (message == "/quit") {
+                    connected = false;
+                    shutdown(client, SHUT_RDWR);
+                    break;
+                }
+            }
+
+            if (receiver.joinable()) receiver.join();
+            close(client);
+
+            Neon::network("Client session ended");
+            Neon::show_stats(stats);
         }
 
-        std::cout << UI::CYAN << "[CONNECTION] Client connected\n" << UI::RESET;
+        close(server);
+        server = -1;
 
-        char buffer[4096]{};
-        ssize_t n = recv(client, buffer, sizeof(buffer) - 1, 0);
-
-        if (n > 0) {
-            buffer[n] = '\0';
-            std::cout << UI::YELLOW << "[RECEIVED] ";
-            std::cout << UI::RESET << buffer << '\n';
-
-            const char* reply = "CipherAPI: message received!";
-            send(client, reply, strlen(reply), 0);
-
-            std::cout << UI::GREEN << "[RESPONSE] Sent successfully\n";
-            std::cout << UI::RESET;
-        } else {
-            std::cout << UI::RED << "[WARNING] Empty message\n";
-            std::cout << UI::RESET;
-        }
-
-        close(client);
-        std::cout << UI::CYAN << "[CONNECTION] Closed\n";
-        std::cout << "-------------------------------------\n";
-        std::cout << UI::RESET;
+    } catch (const std::exception& e) {
+        if (server >= 0) close(server);
+        Neon::error(e.what());
+        return 1;
     }
 
-    close(server_fd);
     return 0;
 }

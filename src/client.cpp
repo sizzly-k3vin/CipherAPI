@@ -1,82 +1,179 @@
-#include <iostream>
-#include <string>
-#include <unistd.h>
+#include "library.hpp"
+#include "logger.hpp"
+#include "transport.hpp"
+#include "neon.hpp"
+
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <unistd.h>
+#include <atomic>
+#include <chrono>
+#include <cerrno>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <thread>
 
-namespace UI {
-    constexpr const char* RESET  = "\033[0m";
-    constexpr const char* CYAN   = "\033[36m";
-    constexpr const char* GREEN  = "\033[32m";
-    constexpr const char* RED    = "\033[31m";
-    constexpr const char* YELLOW = "\033[33m";
-    constexpr const char* BOLD   = "\033[1m";
+constexpr uint16_t PORT = 8080;
+
+static bool transmit(int fd, LibraryManager& libraries,
+                     Neon::Stats& stats, const std::string& message) {
+    const auto start = std::chrono::steady_clock::now();
+    std::string encoded = libraries.encode(message);
+    const auto end = std::chrono::steady_clock::now();
+
+    const double ms =
+        std::chrono::duration<double, std::milli>(end - start).count();
+
+    Neon::encode(
+        std::to_string(message.size()) + " chars | " +
+        std::to_string(encoded.size() / 64) + " tokens | " +
+        std::to_string(encoded.size()) + " bytes | " +
+        std::to_string(ms) + " ms"
+    );
+
+    CipherTransport::send_frame(fd, encoded);
+
+    ++stats.sent_messages;
+    stats.sent_chars += message.size();
+    stats.sent_tokens += encoded.size() / 64;
+    stats.sent_bytes += encoded.size();
+
+    Neon::send("Frame transmitted successfully");
+    return true;
 }
 
 int main() {
-    std::cout << UI::CYAN << UI::BOLD;
-    std::cout << R"(   _______       __              ___    ____  ____
-  / ____(_)___  / /_  ___  _____/   |  / __ \/  _/
- / /   / / __ \/ __ \/ _ \/ ___/ /| | / /_/ // /
-/ /___/ / /_/ / / / /  __/ /  / ___ |/ ____// /
-\____/_/ .___/_/ /_/\___/_/  /_/  |_/_/   /___/
-      /_/
-)";
-    std::cout << UI::RESET;
+    int sock = -1;
 
-    std::cout << UI::YELLOW << "          CipherAPI CLIENT v0.3\n";
-    std::cout << "          =====================\n" << UI::RESET;
+    try {
+        Neon::banner("CLIENT");
+        LibraryManager libraries("libraries");
+        Neon::info("Translation engine initialized");
 
-    std::cout << UI::CYAN << "[*] Initializing connection...\n" << UI::RESET;
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0) throw std::runtime_error("Socket creation failed");
 
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0) {
-        std::cerr << UI::RED << "[ERROR] Socket creation failed\n" << UI::RESET;
-        perror("socket");
+        sockaddr_in server{};
+        server.sin_family = AF_INET;
+        server.sin_port = htons(PORT);
+        inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
+
+        Neon::network("Connecting to 127.0.0.1:8080");
+
+        if (connect(sock, reinterpret_cast<sockaddr*>(&server),
+                    sizeof(server)) < 0)
+            throw std::runtime_error("Connection failed");
+
+        Neon::network("Connection established");
+        Neon::info("Full-duplex communication enabled");
+        Neon::show_help_hint();
+
+        Neon::Stats stats;
+        std::atomic<bool> connected{true};
+
+        std::thread receiver([&]() {
+            try {
+                std::string encoded;
+
+                while (connected &&
+                       CipherTransport::receive_frame(sock, encoded)) {
+                    stats.received_bytes += encoded.size();
+                    stats.received_tokens += encoded.size() / 64;
+
+                    Neon::receive(
+                        std::to_string(encoded.size()) + " bytes | " +
+                        std::to_string(encoded.size() / 64) + " tokens"
+                    );
+
+                    const auto start = std::chrono::steady_clock::now();
+                    std::string message = libraries.decode(encoded);
+                    const auto end = std::chrono::steady_clock::now();
+
+                    const double ms =
+                        std::chrono::duration<double, std::milli>(
+                            end - start).count();
+
+                    ++stats.received_messages;
+                    stats.received_chars += message.size();
+
+                    Neon::decode(
+                        std::to_string(encoded.size() / 64) +
+                        " tokens -> " + std::to_string(message.size()) +
+                        " chars | " + std::to_string(ms) + " ms"
+                    );
+
+                    Neon::print_message("SERVER", message);
+
+                    if (message == "/quit") {
+                        connected = false;
+                        shutdown(sock, SHUT_RDWR);
+                        break;
+                    }
+                }
+            } catch (const std::exception& e) {
+                if (connected) Neon::error(e.what());
+            }
+
+            connected = false;
+            shutdown(sock, SHUT_RDWR);
+            Neon::network("Receive channel closed");
+        });
+
+        std::string message;
+
+        while (connected) {
+            Neon::prompt("CLIENT");
+
+            if (!std::getline(std::cin, message)) {
+                if (connected) {
+                    try { transmit(sock, libraries, stats, "/quit"); }
+                    catch (...) {}
+                }
+                connected = false;
+                shutdown(sock, SHUT_RDWR);
+                break;
+            }
+
+            if (message == "/help") {
+                Neon::help();
+                continue;
+            }
+            if (message == "/stats") {
+                Neon::show_stats(stats);
+                continue;
+            }
+            if (message == "/clear") {
+                Neon::clear();
+                continue;
+            }
+
+            if (!connected) break;
+
+            transmit(sock, libraries, stats, message);
+
+            if (message == "/quit") {
+                connected = false;
+                shutdown(sock, SHUT_RDWR);
+                break;
+            }
+        }
+
+        if (receiver.joinable()) receiver.join();
+        close(sock);
+        sock = -1;
+
+        Neon::network("Client session closed");
+        Neon::show_stats(stats);
+
+    } catch (const std::exception& e) {
+        if (sock >= 0) {
+            shutdown(sock, SHUT_RDWR);
+            close(sock);
+        }
+        Neon::error(e.what());
         return 1;
     }
-
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
-
-    if (connect(fd, (sockaddr*)&addr, sizeof(addr)) < 0) {
-        std::cerr << UI::RED << "[ERROR] Connection failed\n" << UI::RESET;
-        perror("connect");
-        close(fd);
-        return 1;
-    }
-
-    std::cout << UI::GREEN << "[+] Connected to CipherAPI server\n";
-    std::cout << "[+] Connection status: ONLINE\n" << UI::RESET;
-
-    std::string msg;
-    std::cout << UI::YELLOW << "\nMessage > " << UI::RESET;
-    std::getline(std::cin, msg);
-
-    if (send(fd, msg.data(), msg.size(), 0) < 0) {
-        std::cerr << UI::RED << "[ERROR] Message transmission failed\n" << UI::RESET;
-        close(fd);
-        return 1;
-    }
-
-    std::cout << UI::CYAN << "[TX] Message transmitted\n" << UI::RESET;
-
-    char buffer[4096]{};
-    ssize_t n = recv(fd, buffer, sizeof(buffer) - 1, 0);
-
-    if (n > 0) {
-        buffer[n] = '\0';
-        std::cout << UI::GREEN << "[RX] Server response received\n";
-        std::cout << UI::RESET;
-        std::cout << UI::BOLD << "Server >> " << UI::RESET << buffer << '\n';
-    } else {
-        std::cout << UI::RED << "[ERROR] No response received\n" << UI::RESET;
-    }
-
-    close(fd);
-    std::cout << UI::CYAN << "\n[*] Session terminated\n" << UI::RESET;
 
     return 0;
 }

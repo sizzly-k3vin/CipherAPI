@@ -1,11 +1,13 @@
 #pragma once
 #include <chrono>
+#include <cerrno>
 #include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <system_error>
 
 namespace CipherLog {
 inline std::mutex log_mutex;
@@ -21,6 +23,40 @@ inline void write(const char* level, const std::string& message,
     output << '[' << std::put_time(&local, "%H:%M:%S")
            << "] [" << level << "] " << message << '\n';
     output.flush();
+}
+
+
+inline const char* errno_name(int code) {
+    if (code == EADDRINUSE) return "EADDRINUSE";
+    if (code == EADDRNOTAVAIL) return "EADDRNOTAVAIL";
+    if (code == EACCES) return "EACCES";
+    if (code == EBADF) return "EBADF";
+    if (code == EINTR) return "EINTR";
+    if (code == EINVAL) return "EINVAL";
+    if (code == EMFILE) return "EMFILE";
+    if (code == ENFILE) return "ENFILE";
+    if (code == ENOMEM) return "ENOMEM";
+    if (code == ENOBUFS) return "ENOBUFS";
+    if (code == ECONNREFUSED) return "ECONNREFUSED";
+    if (code == ECONNRESET) return "ECONNRESET";
+    if (code == ETIMEDOUT) return "ETIMEDOUT";
+    if (code == EPIPE) return "EPIPE";
+    if (code == ENOTCONN) return "ENOTCONN";
+    return "UNKNOWN";
+}
+
+inline void system_error(const std::string& id,
+                         const std::string& operation,
+                         int code) {
+    const std::string detail =
+        std::error_code(code, std::generic_category()).message();
+
+    write("ERROR",
+          "[" + id + "] " + operation +
+          " | errno=" + std::to_string(code) +
+          " | name=" + errno_name(code) +
+          " | detail=" + detail,
+          std::cerr);
 }
 
 inline void info(const std::string& s)    { write("INFO", s, std::cout); }

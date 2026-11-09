@@ -85,12 +85,23 @@ int main() {
         Neon::info("Binary image transport initialized");
 
         server = socket(AF_INET, SOCK_STREAM, 0);
-        if (server < 0)
-            throw std::runtime_error("Socket creation failed");
+        if (server < 0) {
+            const int err = errno;
+            CipherLog::system_error("NET-001", "socket()", err);
+            throw std::runtime_error("Server socket initialization failed");
+        }
+
+        Neon::network("TCP socket created");
 
         int reuse = 1;
-        setsockopt(server, SOL_SOCKET, SO_REUSEADDR,
-                   &reuse, sizeof(reuse));
+        if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR,
+                       &reuse, sizeof(reuse)) < 0) {
+            const int err = errno;
+            CipherLog::system_error("NET-008", "setsockopt()", err);
+            throw std::runtime_error("Socket configuration failed");
+        }
+
+        Neon::network("SO_REUSEADDR enabled");
 
         sockaddr_in address{};
         address.sin_family = AF_INET;
@@ -98,11 +109,21 @@ int main() {
         address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
         if (bind(server, reinterpret_cast<sockaddr*>(&address),
-                 sizeof(address)) < 0)
-            throw std::runtime_error("Bind failed");
+                 sizeof(address)) < 0) {
+            const int err = errno;
+            CipherLog::system_error("NET-002", "bind(127.0.0.1:8080)", err);
+            throw std::runtime_error("Server bind failed");
+        }
 
-        if (listen(server, 5) < 0)
-            throw std::runtime_error("Listen failed");
+        Neon::network("Socket bound to 127.0.0.1:8080");
+
+        if (listen(server, 5) < 0) {
+            const int err = errno;
+            CipherLog::system_error("NET-003", "listen()", err);
+            throw std::runtime_error("Server listen failed");
+        }
+
+        Neon::network("Listening socket ready");
 
         Neon::network("Listening on 127.0.0.1:8080");
 

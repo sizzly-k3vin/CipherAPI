@@ -1,7 +1,7 @@
-
-# CMake build output
-/build/
-/cmake-build-*/
-
-# Temporary files
-*.bak
+build/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.log
+received_images/

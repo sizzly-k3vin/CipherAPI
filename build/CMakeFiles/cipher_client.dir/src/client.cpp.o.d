@@ -862,4 +862,38 @@ CMakeFiles/cipher_client.dir/src/client.cpp.o: \
   /data/data/com.termux/files/usr/bin/../../usr/include/c++/v1/__vector/erase.h \
   /data/data/com.termux/files/usr/bin/../../usr/include/c++/v1/stack \
   /data/data/com.termux/files/usr/bin/../../usr/include/c++/v1/print \
-  /data/data/com.termux/files/usr/bin/../../usr/include/unistd.h
+  /data/data/com.termux/files/usr/bin/../../usr/include/unistd.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/fcntl.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/getentropy.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/getopt.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/ioctl.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/lockf.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/sysconf.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/android/legacy_unistd_inlines.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/arpa/inet.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/netinet/in.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/endian.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/sys/endian.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/netinet/in6.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/in6.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/libc-compat.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/sys/socket.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/aarch64-linux-android/asm/socket.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/asm-generic/socket.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/aarch64-linux-android/asm/sockios.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/asm-generic/sockios.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/sockios.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/uio.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/sockaddr_storage.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/sa_family_t.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/in.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/ip_msfilter.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/in_addr.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/bits/ip_mreq_source.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/socket.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/aarch64-linux-android/asm/byteorder.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/byteorder/little_endian.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/swab.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/aarch64-linux-android/asm/swab.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/asm-generic/swab.h \
+  /data/data/com.termux/files/usr/bin/../../usr/include/linux/ipv6.h

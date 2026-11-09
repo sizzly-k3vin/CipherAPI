@@ -3,19 +3,25 @@
 
 CMakeFiles/cipher_server.dir/src/server.cpp.o: /data/data/com.termux/files/home/CipherAPI/src/server.cpp \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/bitsperlong.h \
+  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/byteorder.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/errno.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/fcntl.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/posix_types.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sigcontext.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/siginfo.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/signal.h \
+  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/socket.h \
+  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sockios.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sve_context.h \
+  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/swab.h \
   /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/types.h \
   /data/data/com.termux/files/usr/include/alloca.h \
   /data/data/com.termux/files/usr/include/android/api-level.h \
   /data/data/com.termux/files/usr/include/android/legacy_stdlib_inlines.h \
+  /data/data/com.termux/files/usr/include/android/legacy_unistd_inlines.h \
   /data/data/com.termux/files/usr/include/android/ndk-version.h \
   /data/data/com.termux/files/usr/include/android/versioning.h \
+  /data/data/com.termux/files/usr/include/arpa/inet.h \
   /data/data/com.termux/files/usr/include/asm-generic/bitsperlong.h \
   /data/data/com.termux/files/usr/include/asm-generic/errno-base.h \
   /data/data/com.termux/files/usr/include/asm-generic/errno.h \
@@ -25,17 +31,31 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o: /data/data/com.termux/files/home/
   /data/data/com.termux/files/usr/include/asm-generic/siginfo.h \
   /data/data/com.termux/files/usr/include/asm-generic/signal-defs.h \
   /data/data/com.termux/files/usr/include/asm-generic/signal.h \
+  /data/data/com.termux/files/usr/include/asm-generic/socket.h \
+  /data/data/com.termux/files/usr/include/asm-generic/sockios.h \
+  /data/data/com.termux/files/usr/include/asm-generic/swab.h \
   /data/data/com.termux/files/usr/include/asm-generic/types.h \
   /data/data/com.termux/files/usr/include/bits/bionic_multibyte_result.h \
+  /data/data/com.termux/files/usr/include/bits/fcntl.h \
   /data/data/com.termux/files/usr/include/bits/flock.h \
   /data/data/com.termux/files/usr/include/bits/flock64.h \
+  /data/data/com.termux/files/usr/include/bits/getentropy.h \
+  /data/data/com.termux/files/usr/include/bits/getopt.h \
+  /data/data/com.termux/files/usr/include/bits/in_addr.h \
+  /data/data/com.termux/files/usr/include/bits/ioctl.h \
+  /data/data/com.termux/files/usr/include/bits/ip_mreq_source.h \
+  /data/data/com.termux/files/usr/include/bits/ip_msfilter.h \
+  /data/data/com.termux/files/usr/include/bits/lockf.h \
   /data/data/com.termux/files/usr/include/bits/mbstate_t.h \
   /data/data/com.termux/files/usr/include/bits/page_size.h \
   /data/data/com.termux/files/usr/include/bits/posix_limits.h \
   /data/data/com.termux/files/usr/include/bits/pthread_types.h \
+  /data/data/com.termux/files/usr/include/bits/sa_family_t.h \
   /data/data/com.termux/files/usr/include/bits/seek_constants.h \
   /data/data/com.termux/files/usr/include/bits/signal_types.h \
+  /data/data/com.termux/files/usr/include/bits/sockaddr_storage.h \
   /data/data/com.termux/files/usr/include/bits/strcasecmp.h \
+  /data/data/com.termux/files/usr/include/bits/sysconf.h \
   /data/data/com.termux/files/usr/include/bits/timespec.h \
   /data/data/com.termux/files/usr/include/bits/wait.h \
   /data/data/com.termux/files/usr/include/bits/wchar_limits.h \
@@ -808,25 +828,37 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o: /data/data/com.termux/files/home/
   /data/data/com.termux/files/usr/include/c++/v1/wchar.h \
   /data/data/com.termux/files/usr/include/c++/v1/wctype.h \
   /data/data/com.termux/files/usr/include/ctype.h \
+  /data/data/com.termux/files/usr/include/endian.h \
   /data/data/com.termux/files/usr/include/errno.h \
   /data/data/com.termux/files/usr/include/features.h \
   /data/data/com.termux/files/usr/include/limits.h \
+  /data/data/com.termux/files/usr/include/linux/byteorder/little_endian.h \
   /data/data/com.termux/files/usr/include/linux/compiler.h \
   /data/data/com.termux/files/usr/include/linux/compiler_types.h \
   /data/data/com.termux/files/usr/include/linux/errno.h \
+  /data/data/com.termux/files/usr/include/linux/in.h \
+  /data/data/com.termux/files/usr/include/linux/in6.h \
+  /data/data/com.termux/files/usr/include/linux/ipv6.h \
+  /data/data/com.termux/files/usr/include/linux/libc-compat.h \
   /data/data/com.termux/files/usr/include/linux/limits.h \
   /data/data/com.termux/files/usr/include/linux/posix_types.h \
   /data/data/com.termux/files/usr/include/linux/sched.h \
   /data/data/com.termux/files/usr/include/linux/sched/types.h \
   /data/data/com.termux/files/usr/include/linux/signal.h \
+  /data/data/com.termux/files/usr/include/linux/socket.h \
+  /data/data/com.termux/files/usr/include/linux/sockios.h \
   /data/data/com.termux/files/usr/include/linux/stddef.h \
+  /data/data/com.termux/files/usr/include/linux/swab.h \
   /data/data/com.termux/files/usr/include/linux/time.h \
   /data/data/com.termux/files/usr/include/linux/time_types.h \
   /data/data/com.termux/files/usr/include/linux/types.h \
+  /data/data/com.termux/files/usr/include/linux/uio.h \
   /data/data/com.termux/files/usr/include/linux/wait.h \
   /data/data/com.termux/files/usr/include/locale.h \
   /data/data/com.termux/files/usr/include/malloc.h \
   /data/data/com.termux/files/usr/include/math.h \
+  /data/data/com.termux/files/usr/include/netinet/in.h \
+  /data/data/com.termux/files/usr/include/netinet/in6.h \
   /data/data/com.termux/files/usr/include/pthread.h \
   /data/data/com.termux/files/usr/include/sched.h \
   /data/data/com.termux/files/usr/include/signal.h \
@@ -836,7 +868,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o: /data/data/com.termux/files/home/
   /data/data/com.termux/files/usr/include/string.h \
   /data/data/com.termux/files/usr/include/strings.h \
   /data/data/com.termux/files/usr/include/sys/cdefs.h \
+  /data/data/com.termux/files/usr/include/sys/endian.h \
   /data/data/com.termux/files/usr/include/sys/select.h \
+  /data/data/com.termux/files/usr/include/sys/socket.h \
   /data/data/com.termux/files/usr/include/sys/time.h \
   /data/data/com.termux/files/usr/include/sys/types.h \
   /data/data/com.termux/files/usr/include/sys/ucontext.h \
@@ -923,19 +957,29 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/sys/time.h:
 
+/data/data/com.termux/files/usr/include/sys/endian.h:
+
 /data/data/com.termux/files/usr/include/sys/cdefs.h:
 
 /data/data/com.termux/files/usr/include/stdio.h:
 
 /data/data/com.termux/files/usr/include/signal.h:
 
+/data/data/com.termux/files/usr/include/netinet/in6.h:
+
 /data/data/com.termux/files/usr/include/math.h:
 
 /data/data/com.termux/files/usr/include/malloc.h:
 
+/data/data/com.termux/files/usr/include/linux/uio.h:
+
 /data/data/com.termux/files/usr/include/linux/types.h:
 
 /data/data/com.termux/files/usr/include/linux/time_types.h:
+
+/data/data/com.termux/files/usr/include/linux/sockios.h:
+
+/data/data/com.termux/files/usr/include/linux/socket.h:
 
 /data/data/com.termux/files/usr/include/linux/signal.h:
 
@@ -943,15 +987,23 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/linux/sched.h:
 
-/data/data/com.termux/files/usr/include/linux/limits.h:
+/data/data/com.termux/files/usr/include/linux/libc-compat.h:
+
+/data/data/com.termux/files/usr/include/linux/ipv6.h:
+
+/data/data/com.termux/files/usr/include/linux/in6.h:
 
 /data/data/com.termux/files/usr/include/linux/errno.h:
 
 /data/data/com.termux/files/usr/include/linux/compiler_types.h:
 
+/data/data/com.termux/files/usr/include/linux/byteorder/little_endian.h:
+
 /data/data/com.termux/files/usr/include/features.h:
 
 /data/data/com.termux/files/usr/include/errno.h:
+
+/data/data/com.termux/files/usr/include/endian.h:
 
 /data/data/com.termux/files/usr/include/ctype.h:
 
@@ -969,7 +1021,23 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/typeinfo:
 
+/data/data/com.termux/files/usr/include/c++/v1/tuple:
+
 /data/data/com.termux/files/usr/include/c++/v1/system_error:
+
+/data/data/com.termux/files/usr/include/c++/v1/string_view:
+
+/data/data/com.termux/files/usr/include/c++/v1/string:
+
+/data/data/com.termux/files/usr/include/c++/v1/streambuf:
+
+/data/data/com.termux/files/usr/include/sys/select.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/stdio.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/stdexcept:
+
+/data/data/com.termux/files/usr/include/c++/v1/stddef.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/stack:
 
@@ -979,9 +1047,13 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/ostream:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_generate.h:
+/data/data/com.termux/files/usr/lib/clang/21/lib/linux/libclang_rt.builtins-aarch64-android.a:
 
-/data/data/com.termux/files/usr/include/c++/v1/math.h:
+/data/data/com.termux/files/usr/include/c++/v1/optional:
+
+/data/data/com.termux/files/usr/include/c++/v1/mutex:
+
+/data/data/com.termux/files/usr/include/c++/v1/memory:
 
 /data/data/com.termux/files/usr/include/stdlib.h:
 
@@ -1071,8 +1143,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__vector/vector.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/memory:
-
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_standard_layout.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__vector/pmr.h:
@@ -1101,8 +1171,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__utility/declval.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/stdexcept:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/make_projected.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__utility/auto_cast.h:
@@ -1123,10 +1191,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/strip_signature.h:
 
-/data/data/com.termux/files/usr/lib/clang/21/lib/linux/libclang_rt.builtins-aarch64-android.a:
-
-/data/data/com.termux/files/usr/include/c++/v1/optional:
-
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/result_of.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/format_string.h:
@@ -1134,10 +1198,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_reference.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_pointer.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__memory/allocate_at_least.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_extent.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_const_ref.h:
 
@@ -1161,6 +1221,8 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_unsigned_integer.h:
 
+/data/data/com.termux/files/usr/include/netinet/in.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__memory/raw_storage_iterator.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__tuple/tuple_types.h:
@@ -1180,8 +1242,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/signal.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_scalar.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/string:
 
 /data/data/com.termux/files/usr/include/c++/v1/__atomic/fence.h:
 
@@ -1237,7 +1297,7 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/extent.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/disjunction.h:
+/data/data/com.termux/files/usr/include/bits/sysconf.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/advance.h:
 
@@ -1337,10 +1397,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__random/is_valid.h:
 
-/data/data/com.termux/files/usr/include/string.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__ostream/put_character_sequence.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__numeric/partial_sum.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__new/launder.h:
@@ -1370,10 +1426,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/integral_constant.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__memory/uses_allocator.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/search_n.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/stdlib.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__memory/unique_temporary_buffer.h:
 
@@ -1415,9 +1467,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__node_handle:
 
-/data/data/com.termux/files/usr/include/bits/bionic_multibyte_result.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/iter_swap.h:
+
+/data/data/com.termux/files/usr/include/bits/bionic_multibyte_result.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__memory/concepts.h:
 
@@ -1436,6 +1488,10 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__memory/allocator.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_referenceable.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_extent.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__memory/allocate_at_least.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/range_formatter.h:
 
@@ -1505,8 +1561,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/reverse_iterator.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/mutex:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_sorted.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/reverse_access.h:
@@ -1514,8 +1568,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/bits/flock64.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/readable_traits.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/streambuf:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_enum.h:
 
@@ -1565,8 +1617,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_arithmetic.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__iterator/aliasing_iterator.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_compound.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_assignable.h:
@@ -1586,8 +1636,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_partitioned.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__fwd/vector.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__fwd/variant.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__concepts/invocable.h:
 
@@ -1627,19 +1675,15 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__fwd/pair.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__fwd/memory.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/string_view:
-
 /data/data/com.termux/files/usr/include/c++/v1/__fwd/istream.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/indic_conjunct_break_table.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_const.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__utility/exchange.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_remove.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__utility/exchange.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/swap_ranges.h:
 
@@ -1667,6 +1711,8 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__functional/pointer_to_binary_function.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__functional/perfect_forward.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__math/special_functions.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__math/abs.h:
@@ -1679,9 +1725,21 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__functional/operations.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__format/formatter_bool.h:
+/data/data/com.termux/files/usr/include/bits/mbstate_t.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__functional/not_fn.h:
+/data/data/com.termux/files/usr/include/c++/v1/__functional/mem_fun_ref.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_remove_copy_if.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__bit/bit_ceil.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/deque:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/is_transparent.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/invoke.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/identity.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_nothrow_assignable.h:
 
@@ -1693,17 +1751,19 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__fwd/deque.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_cv.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__system_error/errc.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_is_partitioned.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/default_searcher.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/cstdint:
 
 /data/data/com.termux/files/usr/include/c++/v1/cstdio:
 
 /data/data/com.termux/files/usr/include/c++/v1/__functional/boyer_moore_searcher.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_floating_point.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__compare/compare_three_way.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/binder2nd.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__functional/binder1st.h:
 
@@ -1735,13 +1795,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/formatter_integral.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__format/formatter.h:
+/data/data/com.termux/files/usr/include/c++/v1/__functional/not_fn.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/radix_sort.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_rotate_copy.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__format/format_to_n_result.h:
+/data/data/com.termux/files/usr/include/c++/v1/__format/formatter_bool.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/type_traits:
 
@@ -1761,9 +1817,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_iterator_concept.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__format/format_arg.h:
+/data/data/com.termux/files/usr/include/sys/socket.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/copy_if.h:
+/data/data/com.termux/files/usr/include/c++/v1/__format/format_arg.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__concepts/arithmetic.h:
 
@@ -1797,21 +1853,11 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__debug_utils/randomize_range.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__cstddef/max_align_t.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/sort_heap.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__cstddef/byte.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__configuration/platform.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_remove_copy_if.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__bit/bit_ceil.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/deque:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/is_transparent.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__config_site:
 
@@ -1859,6 +1905,8 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__compare/partial_order.h:
 
+/data/data/com.termux/files/usr/include/linux/in.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/rank.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_nothrow_constructible.h:
@@ -1883,9 +1931,19 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__compare/compare_weak_order_fallback.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_floating_point.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/binder2nd.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__compare/compare_three_way.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_trivially_destructible.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/in_out_result.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/math.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_generate.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__compare/compare_strong_order_fallback.h:
 
@@ -1967,17 +2025,15 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__utility/element_count.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__math/gamma.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__format/formatter_integer.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__math/gamma.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__atomic/kill_dependency.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/three_way_comp_ref_type.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/in_found_result.h:
 
-/data/data/com.termux/files/usr/include/asm-generic/siginfo.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/mem_fn.h:
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/socket.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__bit/invert_if.h:
 
@@ -2017,6 +2073,10 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/uniform_random_bit_generator_adaptor.h:
 
+/data/data/com.termux/files/usr/include/asm-generic/siginfo.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/three_way_comp_ref_type.h:
+
 /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sigcontext.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__atomic/support.h:
@@ -2036,8 +2096,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_count_if.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/shift_right.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/identity.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/set_symmetric_difference.h:
 
@@ -2060,14 +2118,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/sortable.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/reverse_copy.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_cv.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__system_error/errc.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_is_partitioned.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/default_searcher.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_fundamental.h:
 
@@ -2097,12 +2147,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_unique.h:
 
-/data/data/com.termux/files/usr/include/linux/wait.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__new/placement_new_delete.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_swap_ranges.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_push_heap.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_stable_sort.h:
@@ -2111,9 +2155,15 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__concepts/predicate.h:
 
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sockios.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_array.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_sort_heap.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__variant/monostate.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_sort.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/common_type.h:
 
@@ -2121,59 +2171,19 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__ranges/from_range.h:
 
+/data/data/com.termux/files/usr/include/bits/sa_family_t.h:
+
 /data/data/com.termux/files/usr/lib/clang/21/include/__stdarg___va_copy.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_set_symmetric_difference.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/for_each_n.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_set_difference.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/make_signed.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__math/remainder.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/reverse.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_sample.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__memory/temporary_buffer.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/stable_sort.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/sift_down.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/for_each_segment.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__ranges/enable_borrowed_range.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__iterator/back_insert_iterator.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__charconv/traits.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/decay.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find_first_of.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/sort.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__charconv/to_chars_base_10.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/iterator:
-
-/data/data/com.termux/files/usr/include/c++/v1/__concepts/destructible.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__chrono/high_resolution_clock.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_backward.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_rotate.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__assert:
-
-/data/data/com.termux/files/usr/include/bits/posix_limits.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_n.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_reverse_copy.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/perfect_forward.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_search_n.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_aggregate.h:
 
@@ -2195,12 +2205,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__charconv/to_chars_floating_point.h:
 
-/data/data/com.termux/files/usr/lib/clang/21/include/__stdarg_va_arg.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_signed.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/print:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_binary_search.h:
 
 /data/data/com.termux/files/usr/include/pthread.h:
@@ -2221,6 +2225,8 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__bit/rotate.h:
 
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/byteorder.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_heap_until.h:
 
 /data/data/com.termux/files/usr/include/android/legacy_stdlib_inlines.h:
@@ -2239,9 +2245,19 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_generate_n.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_backward.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__chrono/high_resolution_clock.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/distance.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__atomic/atomic_lock_free.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_n.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__assert:
+
+/data/data/com.termux/files/usr/include/bits/posix_limits.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/remove_cvref.h:
 
@@ -2267,11 +2283,19 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_find.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__functional/mem_fn.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_fill_n.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_fill.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_rotate_copy.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_replace_if.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/radix_sort.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__format/format_to_n_result.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__format/formatter.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_fill.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__exception/nested_exception.h:
 
@@ -2283,23 +2307,11 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_count.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/copy_if.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_member_pointer.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/tuple:
-
-/data/data/com.termux/files/usr/include/c++/v1/__string/extern_template_lists.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/unwrap_range.h:
-
-/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/types.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__fwd/functional.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__memory_resource/memory_resource.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/copy.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__atomic/aliases.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_rotate.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_clamp.h:
 
@@ -2313,6 +2325,8 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_adjacent_find.h:
 
+/data/data/com.termux/files/usr/include/asm-generic/swab.h:
+
 /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/posix_types.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/pstl.h:
@@ -2323,9 +2337,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/pop_heap.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__functional/invoke.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/partition.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_reverse_copy.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/escaped_output_table.h:
 
@@ -2333,7 +2347,27 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__compare/synth_three_way.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__fwd/functional.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__memory_resource/memory_resource.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/copy.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__atomic/aliases.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_move.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_find_if_not.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__string/constexpr_c_functions.h:
+
+/data/data/com.termux/files/usr/include/bits/ip_mreq_source.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_nth_element.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/none_of.h:
+
+/data/data/com.termux/files/usr/include/android/api-level.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/partial_sort.h:
 
@@ -2341,23 +2375,17 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/bitsperlong.h:
 
-/data/data/com.termux/files/usr/include/android/api-level.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/next_permutation.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__memory/destruct_n.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__vector/vector_bool.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_const.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_find_if_not.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/next_permutation.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__string/constexpr_c_functions.h:
+/data/data/com.termux/files/usr/include/c++/v1/stdlib.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_nth_element.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/none_of.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/search_n.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__ranges/movable_box.h:
 
@@ -2366,8 +2394,6 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 /data/data/com.termux/files/usr/include/c++/v1/__concepts/constructible.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/mismatch.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/minmax_element.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_max_element.h:
 
@@ -2379,19 +2405,21 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/lexicographical_compare_three_way.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__fwd/memory.h:
+
+/data/data/com.termux/files/usr/include/android/legacy_unistd_inlines.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/minmax.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__fwd/variant.h:
+
+/data/data/com.termux/files/usr/include/asm-generic/socket.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/iostream:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_replace_copy_if.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/min_element.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__fwd/sstream.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_equal_range.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/merge.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_convertible.h:
 
@@ -2401,53 +2429,29 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/max_element.h:
 
-/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/errno.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__utility/swap.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__config:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/equal.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__chrono/time_point.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/any_of.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/make_heap.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/count_if.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__math/copysign.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/lexicographical_compare.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_set_difference.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/replace.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__utility/convert_to_integral.h:
-
-/data/data/com.termux/files/usr/include/asm-generic/fcntl.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/iterator_operations.h:
-
-/data/data/com.termux/files/usr/include/sys/select.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/stdio.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__iterator/iterator.h:
-
-/data/data/com.termux/files/usr/include/linux/compiler.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/fill.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/max.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__charconv/tables.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_sorted_until.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_permutation.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__compare/compare_three_way_result.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/conjunction.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__ranges/empty.h:
+
+/data/data/com.termux/files/usr/include/bits/sockaddr_storage.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__random/uniform_random_bit_generator.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_heap.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__charconv/tables.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__iterator/aliasing_iterator.h:
+
+/data/data/com.termux/files/usr/include/bits/ip_msfilter.h:
+
+/data/data/com.termux/files/usr/include/bits/lockf.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/in_in_result.h:
 
@@ -2457,25 +2461,21 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/in_in_out_result.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/errno.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/push_heap.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__ranges/container_compatible_range.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/half_positive.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__tuple/find_index.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__memory/temporary_buffer.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/stable_sort.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/sift_down.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/for_each_segment.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/for_each.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/find_segment_if.h:
-
-/data/data/com.termux/files/usr/include/bits/mbstate_t.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/mem_fun_ref.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/functional:
 
@@ -2487,13 +2487,13 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_move_backward.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__iterator/permutable.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/sort.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__fwd/fstream.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find_end.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find_first_of.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/fill_n.h:
+
+/data/data/com.termux/files/usr/include/bits/ioctl.h:
 
 /data/data/com.termux/files/usr/include/strings.h:
 
@@ -2505,6 +2505,12 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/copy_move_common.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__fwd/sstream.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_equal_range.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/merge.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/generate.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__bit/countl.h:
@@ -2515,15 +2521,9 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__memory/allocator_destructor.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/generate_n.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/comp.h:
 
-/data/data/com.termux/files/usr/include/asm-generic/int-ll64.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__locale_dir/locale_base_api.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__concepts/relation.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__functional/function.h:
+/data/data/com.termux/files/usr/include/arpa/inet.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__format/format_error.h:
 
@@ -2531,11 +2531,101 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_is_heap.h:
 
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_replace_if.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__math/rounding_functions.h:
 
 /data/data/com.termux/files/home/CipherAPI/src/server.cpp:
 
+/data/data/com.termux/files/usr/include/linux/swab.h:
+
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/clamp.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__chrono/time_point.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/make_heap.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/any_of.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/adjacent_find.h:
+
+/data/data/com.termux/files/usr/include/bits/wchar_limits.h:
+
+/data/data/com.termux/files/usr/include/bits/wait.h:
+
+/data/data/com.termux/files/usr/include/bits/getentropy.h:
+
+/data/data/com.termux/files/usr/include/string.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__ostream/put_character_sequence.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/generate_n.h:
+
+/data/data/com.termux/files/usr/include/bits/signal_types.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__cstddef/max_align_t.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/make_signed.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__math/remainder.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_sample.h:
+
+/data/data/com.termux/files/usr/include/bits/in_addr.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/for_each_n.h:
+
+/data/data/com.termux/files/usr/include/bits/pthread_types.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__iterator/iterator.h:
+
+/data/data/com.termux/files/usr/include/linux/compiler.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/fill.h:
+
+/data/data/com.termux/files/usr/include/bits/wctype.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/max.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/disjunction.h:
+
+/data/data/com.termux/files/usr/include/linux/limits.h:
+
+/data/data/com.termux/files/usr/include/bits/getopt.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__utility/is_pointer_in_range.h:
+
+/data/data/com.termux/files/usr/include/android/versioning.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/minmax_element.h:
+
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/siginfo.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/iterator_operations.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/replace.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__utility/convert_to_integral.h:
+
+/data/data/com.termux/files/usr/include/asm-generic/fcntl.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__locale_dir/locale_base_api.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__functional/function.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__concepts/relation.h:
+
+/data/data/com.termux/files/usr/include/bits/fcntl.h:
+
+/data/data/com.termux/files/usr/include/asm-generic/int-ll64.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_unsigned.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_any_of.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/iterator:
+
+/data/data/com.termux/files/usr/include/c++/v1/__concepts/destructible.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__ranges/subrange.h:
 
@@ -2543,67 +2633,83 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__concepts/assignable.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/min.h:
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/decay.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__charconv/to_chars_base_10.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_empty.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/in_found_result.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/min.h:
 
-/data/data/com.termux/files/usr/include/bits/wchar_limits.h:
+/data/data/com.termux/files/usr/include/c++/v1/errno.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/adjacent_find.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/push_heap.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_unsigned.h:
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/swab.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_any_of.h:
+/data/data/com.termux/files/usr/lib/clang/21/include/__stdarg_va_arg.h:
 
-/data/data/com.termux/files/usr/include/bits/signal_types.h:
+/data/data/com.termux/files/usr/include/c++/v1/print:
 
-/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/siginfo.h:
+/data/data/com.termux/files/usr/include/c++/v1/__type_traits/is_signed.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find.h:
+/data/data/com.termux/files/usr/include/c++/v1/__ranges/container_compatible_range.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/reverse.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/half_positive.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_search_n.h:
+/data/data/com.termux/files/usr/include/c++/v1/__ranges/enable_borrowed_range.h:
 
-/data/data/com.termux/files/usr/include/bits/pthread_types.h:
+/data/data/com.termux/files/usr/include/c++/v1/__iterator/back_insert_iterator.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/comp.h:
+/data/data/com.termux/files/usr/include/c++/v1/__charconv/traits.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__compare/compare_three_way_result.h:
+/data/data/com.termux/files/usr/include/c++/v1/__math/copysign.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/stddef.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/lexicographical_compare.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__type_traits/conjunction.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__ranges/empty.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__random/uniform_random_bit_generator.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/is_heap.h:
-
-/data/data/com.termux/files/usr/include/bits/wait.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/count_if.h:
 
 /data/data/com.termux/files/usr/include/alloca.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__utility/is_pointer_in_range.h:
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/errno.h:
 
-/data/data/com.termux/files/usr/include/android/versioning.h:
+/data/data/com.termux/files/usr/include/c++/v1/__utility/swap.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__config:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/equal.h:
+
+/data/data/com.termux/files/usr/include/linux/wait.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__new/placement_new_delete.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_swap_ranges.h:
+
+/data/data/com.termux/files/usr/include/asm-generic/posix_types.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__string/extern_template_lists.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/unwrap_range.h:
+
+/data/data/com.termux/files/usr/include/aarch64-linux-android/asm/types.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__iterator/permutable.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__fwd/fstream.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/find_end.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/partition_copy.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__utility/exception_guard.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__memory/inout_ptr.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__iterator/istream_iterator.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__iterator/mergeable.h:
 
 /data/data/com.termux/files/usr/include/bits/seek_constants.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/remove_if.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_if.h:
+/data/data/com.termux/files/usr/include/c++/v1/__iterator/istream_iterator.h:
 
 /data/data/com.termux/files/usr/include/c++/v1/__ostream/basic_ostream.h:
 
@@ -2611,14 +2717,10 @@ CMakeFiles/cipher_server.dir/src/server.cpp.o:
 
 /data/data/com.termux/files/usr/include/c++/v1/__atomic/atomic_ref.h:
 
-/data/data/com.termux/files/usr/include/asm-generic/posix_types.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__variant/monostate.h:
-
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_sort.h:
-
 /data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_pop_heap.h:
 
-/data/data/com.termux/files/usr/include/bits/wctype.h:
+/data/data/com.termux/files/usr/include/asm-generic/sockios.h:
 
-/data/data/com.termux/files/usr/include/c++/v1/__algorithm/partition_copy.h:
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/remove_if.h:
+
+/data/data/com.termux/files/usr/include/c++/v1/__algorithm/ranges_copy_if.h:

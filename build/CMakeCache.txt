@@ -126,7 +126,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=CipherLink
+CMAKE_PROJECT_NAME:STATIC=CipherAPI
 
 //Value Computed by CMake
 CMAKE_PROJECT_SPDX_LICENSE:STATIC=
@@ -195,6 +195,15 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 // during the make.  This is useful for debugging only. With Visual
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
+
+//Value Computed by CMake
+CipherAPI_BINARY_DIR:STATIC=/data/data/com.termux/files/home/CipherAPI/build
+
+//Value Computed by CMake
+CipherAPI_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+CipherAPI_SOURCE_DIR:STATIC=/data/data/com.termux/files/home/CipherAPI
 
 //Value Computed by CMake
 CipherLink_BINARY_DIR:STATIC=/data/data/com.termux/files/home/CipherAPI/build

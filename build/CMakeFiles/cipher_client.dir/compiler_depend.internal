@@ -4,19 +4,25 @@
 CMakeFiles/cipher_client.dir/src/client.cpp.o
  /data/data/com.termux/files/home/CipherAPI/src/client.cpp
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/bitsperlong.h
+ /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/byteorder.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/errno.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/fcntl.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/posix_types.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sigcontext.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/siginfo.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/signal.h
+ /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/socket.h
+ /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sockios.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/sve_context.h
+ /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/swab.h
  /data/data/com.termux/files/usr/include/aarch64-linux-android/asm/types.h
  /data/data/com.termux/files/usr/include/alloca.h
  /data/data/com.termux/files/usr/include/android/api-level.h
  /data/data/com.termux/files/usr/include/android/legacy_stdlib_inlines.h
+ /data/data/com.termux/files/usr/include/android/legacy_unistd_inlines.h
  /data/data/com.termux/files/usr/include/android/ndk-version.h
  /data/data/com.termux/files/usr/include/android/versioning.h
+ /data/data/com.termux/files/usr/include/arpa/inet.h
  /data/data/com.termux/files/usr/include/asm-generic/bitsperlong.h
  /data/data/com.termux/files/usr/include/asm-generic/errno-base.h
  /data/data/com.termux/files/usr/include/asm-generic/errno.h
@@ -26,17 +32,31 @@ CMakeFiles/cipher_client.dir/src/client.cpp.o
  /data/data/com.termux/files/usr/include/asm-generic/siginfo.h
  /data/data/com.termux/files/usr/include/asm-generic/signal-defs.h
  /data/data/com.termux/files/usr/include/asm-generic/signal.h
+ /data/data/com.termux/files/usr/include/asm-generic/socket.h
+ /data/data/com.termux/files/usr/include/asm-generic/sockios.h
+ /data/data/com.termux/files/usr/include/asm-generic/swab.h
  /data/data/com.termux/files/usr/include/asm-generic/types.h
  /data/data/com.termux/files/usr/include/bits/bionic_multibyte_result.h
+ /data/data/com.termux/files/usr/include/bits/fcntl.h
  /data/data/com.termux/files/usr/include/bits/flock.h
  /data/data/com.termux/files/usr/include/bits/flock64.h
+ /data/data/com.termux/files/usr/include/bits/getentropy.h
+ /data/data/com.termux/files/usr/include/bits/getopt.h
+ /data/data/com.termux/files/usr/include/bits/in_addr.h
+ /data/data/com.termux/files/usr/include/bits/ioctl.h
+ /data/data/com.termux/files/usr/include/bits/ip_mreq_source.h
+ /data/data/com.termux/files/usr/include/bits/ip_msfilter.h
+ /data/data/com.termux/files/usr/include/bits/lockf.h
  /data/data/com.termux/files/usr/include/bits/mbstate_t.h
  /data/data/com.termux/files/usr/include/bits/page_size.h
  /data/data/com.termux/files/usr/include/bits/posix_limits.h
  /data/data/com.termux/files/usr/include/bits/pthread_types.h
+ /data/data/com.termux/files/usr/include/bits/sa_family_t.h
  /data/data/com.termux/files/usr/include/bits/seek_constants.h
  /data/data/com.termux/files/usr/include/bits/signal_types.h
+ /data/data/com.termux/files/usr/include/bits/sockaddr_storage.h
  /data/data/com.termux/files/usr/include/bits/strcasecmp.h
+ /data/data/com.termux/files/usr/include/bits/sysconf.h
  /data/data/com.termux/files/usr/include/bits/timespec.h
  /data/data/com.termux/files/usr/include/bits/wait.h
  /data/data/com.termux/files/usr/include/bits/wchar_limits.h
@@ -809,25 +829,37 @@ CMakeFiles/cipher_client.dir/src/client.cpp.o
  /data/data/com.termux/files/usr/include/c++/v1/wchar.h
  /data/data/com.termux/files/usr/include/c++/v1/wctype.h
  /data/data/com.termux/files/usr/include/ctype.h
+ /data/data/com.termux/files/usr/include/endian.h
  /data/data/com.termux/files/usr/include/errno.h
  /data/data/com.termux/files/usr/include/features.h
  /data/data/com.termux/files/usr/include/limits.h
+ /data/data/com.termux/files/usr/include/linux/byteorder/little_endian.h
  /data/data/com.termux/files/usr/include/linux/compiler.h
  /data/data/com.termux/files/usr/include/linux/compiler_types.h
  /data/data/com.termux/files/usr/include/linux/errno.h
+ /data/data/com.termux/files/usr/include/linux/in.h
+ /data/data/com.termux/files/usr/include/linux/in6.h
+ /data/data/com.termux/files/usr/include/linux/ipv6.h
+ /data/data/com.termux/files/usr/include/linux/libc-compat.h
  /data/data/com.termux/files/usr/include/linux/limits.h
  /data/data/com.termux/files/usr/include/linux/posix_types.h
  /data/data/com.termux/files/usr/include/linux/sched.h
  /data/data/com.termux/files/usr/include/linux/sched/types.h
  /data/data/com.termux/files/usr/include/linux/signal.h
+ /data/data/com.termux/files/usr/include/linux/socket.h
+ /data/data/com.termux/files/usr/include/linux/sockios.h
  /data/data/com.termux/files/usr/include/linux/stddef.h
+ /data/data/com.termux/files/usr/include/linux/swab.h
  /data/data/com.termux/files/usr/include/linux/time.h
  /data/data/com.termux/files/usr/include/linux/time_types.h
  /data/data/com.termux/files/usr/include/linux/types.h
+ /data/data/com.termux/files/usr/include/linux/uio.h
  /data/data/com.termux/files/usr/include/linux/wait.h
  /data/data/com.termux/files/usr/include/locale.h
  /data/data/com.termux/files/usr/include/malloc.h
  /data/data/com.termux/files/usr/include/math.h
+ /data/data/com.termux/files/usr/include/netinet/in.h
+ /data/data/com.termux/files/usr/include/netinet/in6.h
  /data/data/com.termux/files/usr/include/pthread.h
  /data/data/com.termux/files/usr/include/sched.h
  /data/data/com.termux/files/usr/include/signal.h
@@ -837,7 +869,9 @@ CMakeFiles/cipher_client.dir/src/client.cpp.o
  /data/data/com.termux/files/usr/include/string.h
  /data/data/com.termux/files/usr/include/strings.h
  /data/data/com.termux/files/usr/include/sys/cdefs.h
+ /data/data/com.termux/files/usr/include/sys/endian.h
  /data/data/com.termux/files/usr/include/sys/select.h
+ /data/data/com.termux/files/usr/include/sys/socket.h
  /data/data/com.termux/files/usr/include/sys/time.h
  /data/data/com.termux/files/usr/include/sys/types.h
  /data/data/com.termux/files/usr/include/sys/ucontext.h

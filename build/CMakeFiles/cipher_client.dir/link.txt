@@ -1,0 +1,1 @@
+/data/data/com.termux/files/usr/bin/c++ -O2 -g -DNDEBUG -Xlinker --dependency-file=CMakeFiles/cipher_client.dir/link.d CMakeFiles/cipher_client.dir/src/client.cpp.o -o cipher_client

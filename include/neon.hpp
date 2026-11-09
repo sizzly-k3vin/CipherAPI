@@ -79,13 +79,13 @@ inline void banner(const std::string& role) {
         << "  |                                                |\n"
         << "  |     C I P H E R A P I   //   N E O N           |\n"
         << "  |                                                |\n"
-        << "  |              VERSION 0.6                       |\n"
+        << "  |              VERSION 0.7                       |\n"
         << "  |                                                |\n"
         << "  +------------------------------------------------+\n"
         << RESET
         << BLUE << "  NODE: " << RESET << role << '\n'
         << BLUE << "  LINK: " << RESET << "TCP / FULL DUPLEX\n"
-        << BLUE << "  MODE: " << RESET << "EXPERIMENTAL TOKEN MAPPING\n"
+        << BLUE << "  MODE: " << RESET << "TOKEN + BINARY MULTIMEDIA\n"
         << BLUE << "  STATUS: " << GREEN << "INITIALIZING\n\n"
         << RESET;
     std::cout.flush();
@@ -118,6 +118,7 @@ inline void help() {
         << "  /help    Show this command list\n"
         << "  /stats   Show session traffic statistics\n"
         << "  /clear   Clear the terminal\n"
+        << "  /sendimg Send an image: /sendimg path/to/image.png\n"
         << "  /quit    End the current session\n\n";
 }
 

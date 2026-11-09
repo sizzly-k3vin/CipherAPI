@@ -1,4 +1,5 @@
 #include "library.hpp"
+#include "image.hpp"
 #include "logger.hpp"
 #include "transport.hpp"
 #include "neon.hpp"
@@ -6,6 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #include <atomic>
 #include <chrono>
 #include <cerrno>
@@ -32,14 +34,44 @@ static void transmit(int fd, LibraryManager& libraries,
         std::to_string(ms) + " ms"
     );
 
-    CipherTransport::send_frame(fd, encoded);
+    CipherTransport::send_frame(fd, CipherTransport::TEXT, encoded);
 
     ++stats.sent_messages;
     stats.sent_chars += message.size();
     stats.sent_tokens += encoded.size() / 64;
     stats.sent_bytes += encoded.size();
 
-    Neon::send("Frame transmitted successfully");
+    Neon::send("Text frame transmitted");
+}
+
+static void transmit_image(int fd, Neon::Stats& stats,
+                           const std::string& path) {
+    const auto start = std::chrono::steady_clock::now();
+
+    std::string packet = ImageLibrary::pack(path);
+
+    const auto packed = std::chrono::steady_clock::now();
+
+    CipherTransport::send_frame(fd, CipherTransport::IMAGE, packet);
+
+    const auto sent = std::chrono::steady_clock::now();
+
+    const double pack_ms =
+        std::chrono::duration<double, std::milli>(packed - start).count();
+
+    const double send_ms =
+        std::chrono::duration<double, std::milli>(sent - packed).count();
+
+    ++stats.sent_messages;
+    stats.sent_bytes += packet.size();
+
+    Neon::info(
+        "Image packet | " + std::to_string(packet.size()) +
+        " bytes | pack " + std::to_string(pack_ms) +
+        " ms | send " + std::to_string(send_ms) + " ms"
+    );
+
+    Neon::send("Image transmitted successfully");
 }
 
 int main() {
@@ -47,14 +79,18 @@ int main() {
 
     try {
         Neon::banner("SERVER");
+
         LibraryManager libraries("libraries");
         Neon::info("Translation engine initialized");
+        Neon::info("Binary image transport initialized");
 
         server = socket(AF_INET, SOCK_STREAM, 0);
-        if (server < 0) throw std::runtime_error("Socket creation failed");
+        if (server < 0)
+            throw std::runtime_error("Socket creation failed");
 
         int reuse = 1;
-        setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+        setsockopt(server, SOL_SOCKET, SO_REUSEADDR,
+                   &reuse, sizeof(reuse));
 
         sockaddr_in address{};
         address.sin_family = AF_INET;
@@ -79,7 +115,7 @@ int main() {
             }
 
             Neon::network("Client connected");
-            Neon::info("Full-duplex session started");
+            Neon::info("Full-duplex text + binary session started");
             Neon::show_help_hint();
 
             Neon::Stats stats;
@@ -87,41 +123,83 @@ int main() {
 
             std::thread receiver([&]() {
                 try {
-                    std::string encoded;
+                    uint8_t type = 0;
+                    std::string payload;
 
                     while (connected &&
-                           CipherTransport::receive_frame(client, encoded)) {
-                        stats.received_bytes += encoded.size();
-                        stats.received_tokens += encoded.size() / 64;
+                           CipherTransport::receive_frame(
+                               client, type, payload)) {
+                        stats.received_bytes += payload.size();
 
-                        Neon::receive(
-                            std::to_string(encoded.size()) + " bytes | " +
-                            std::to_string(encoded.size() / 64) + " tokens"
-                        );
+                        if (type == CipherTransport::TEXT) {
+                            stats.received_tokens += payload.size() / 64;
 
-                        const auto start = std::chrono::steady_clock::now();
-                        std::string message = libraries.decode(encoded);
-                        const auto end = std::chrono::steady_clock::now();
+                            Neon::receive(
+                                std::to_string(payload.size()) +
+                                " bytes | " +
+                                std::to_string(payload.size() / 64) +
+                                " tokens"
+                            );
 
-                        const double ms =
-                            std::chrono::duration<double, std::milli>(
-                                end - start).count();
+                            const auto start =
+                                std::chrono::steady_clock::now();
 
-                        ++stats.received_messages;
-                        stats.received_chars += message.size();
+                            std::string message =
+                                libraries.decode(payload);
 
-                        Neon::decode(
-                            std::to_string(encoded.size() / 64) +
-                            " tokens -> " + std::to_string(message.size()) +
-                            " chars | " + std::to_string(ms) + " ms"
-                        );
+                            const auto end =
+                                std::chrono::steady_clock::now();
 
-                        Neon::print_message("CLIENT", message);
+                            const double ms =
+                                std::chrono::duration<double, std::milli>(
+                                    end - start).count();
 
-                        if (message == "/quit") {
-                            connected = false;
-                            shutdown(client, SHUT_RDWR);
-                            break;
+                            ++stats.received_messages;
+                            stats.received_chars += message.size();
+
+                            Neon::decode(
+                                std::to_string(payload.size() / 64) +
+                                " tokens -> " +
+                                std::to_string(message.size()) +
+                                " chars | " + std::to_string(ms) + " ms"
+                            );
+
+                            Neon::print_message("CLIENT", message);
+
+                            if (message == "/quit") {
+                                connected = false;
+                                shutdown(client, SHUT_RDWR);
+                                break;
+                            }
+                        }
+                        else if (type == CipherTransport::IMAGE) {
+                            Neon::receive(
+                                "Binary image packet | " +
+                                std::to_string(payload.size()) + " bytes"
+                            );
+
+                            const auto start =
+                                std::chrono::steady_clock::now();
+
+                            std::string saved =
+                                ImageLibrary::unpack(payload);
+
+                            const auto end =
+                                std::chrono::steady_clock::now();
+
+                            const double ms =
+                                std::chrono::duration<double, std::milli>(
+                                    end - start).count();
+
+                            ++stats.received_messages;
+
+                            Neon::decode(
+                                "SHA-256 verified | " +
+                                std::to_string(payload.size()) +
+                                " bytes | " + std::to_string(ms) + " ms"
+                            );
+
+                            Neon::print_message("IMAGE", "Saved to " + saved);
                         }
                     }
                 } catch (const std::exception& e) {
@@ -148,18 +226,43 @@ int main() {
                     Neon::help();
                     continue;
                 }
+
                 if (message == "/stats") {
                     Neon::show_stats(stats);
                     continue;
                 }
+
                 if (message == "/clear") {
                     Neon::clear();
                     continue;
                 }
 
+                if (message.rfind("/sendimg ", 0) == 0) {
+                    std::string path = message.substr(9);
+
+                    if (path.size() >= 2 &&
+                        path.front() == '"' && path.back() == '"') {
+                        path = path.substr(1, path.size() - 2);
+                    }
+
+                    try {
+                        transmit_image(client, stats, path);
+                    } catch (const std::exception& e) {
+                        Neon::error(e.what());
+                    }
+                    continue;
+                }
+
                 if (!connected) break;
 
-                transmit(client, libraries, stats, message);
+                try {
+                    transmit(client, libraries, stats, message);
+                } catch (const std::exception& e) {
+                    Neon::error(e.what());
+                    connected = false;
+                    shutdown(client, SHUT_RDWR);
+                    break;
+                }
 
                 if (message == "/quit") {
                     connected = false;
@@ -169,6 +272,7 @@ int main() {
             }
 
             if (receiver.joinable()) receiver.join();
+
             close(client);
 
             Neon::network("Client session ended");
@@ -180,6 +284,7 @@ int main() {
 
     } catch (const std::exception& e) {
         if (server >= 0) close(server);
+
         Neon::error(e.what());
         return 1;
     }

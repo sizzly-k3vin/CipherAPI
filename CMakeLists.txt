@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(CipherAPI VERSION 0.4 LANGUAGES CXX)
+project(CipherAPI VERSION 0.7 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+find_package(OpenSSL REQUIRED)
 
 set(CIPHERAPI_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -13,14 +15,14 @@ set(CIPHERAPI_INCLUDE_DIRS
 add_library(cipher_core STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/library.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/profile.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/image.cpp"
 )
+
 target_include_directories(cipher_core PUBLIC ${CIPHERAPI_INCLUDE_DIRS})
+target_link_libraries(cipher_core PUBLIC OpenSSL::Crypto)
 
 add_executable(cipher_client "${CMAKE_CURRENT_SOURCE_DIR}/src/client.cpp")
-target_include_directories(cipher_client PRIVATE ${CIPHERAPI_INCLUDE_DIRS})
 target_link_libraries(cipher_client PRIVATE cipher_core)
 
 add_executable(cipher_server "${CMAKE_CURRENT_SOURCE_DIR}/src/server.cpp")
-target_include_directories(cipher_server PRIVATE ${CIPHERAPI_INCLUDE_DIRS})
 target_link_libraries(cipher_server PRIVATE cipher_core)
-

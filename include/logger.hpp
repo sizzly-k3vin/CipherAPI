@@ -73,7 +73,7 @@ inline void banner(const std::string& role) {
         << "\n"
         << "  ========================================\n"
         << "          C I P H E R A P I\n"
-        << "             VERSION 0.5\n"
+        << "             VERSION 0.7\n"
         << "  ========================================\n"
         << "  MODE: " << role << '\n'
         << "  TRANSPORT: TCP / FULL DUPLEX\n"

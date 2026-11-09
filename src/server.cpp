@@ -106,7 +106,7 @@ int main() {
         sockaddr_in address{};
         address.sin_family = AF_INET;
         address.sin_port = htons(PORT);
-        address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        address.sin_addr.s_addr = htonl(INADDR_ANY);
 
         if (bind(server, reinterpret_cast<sockaddr*>(&address),
                  sizeof(address)) < 0) {
@@ -115,7 +115,7 @@ int main() {
             throw std::runtime_error("Server bind failed");
         }
 
-        Neon::network("Socket bound to 127.0.0.1:8080");
+        Neon::network("Socket bound to 0.0.0.0:8080");
 
         if (listen(server, 5) < 0) {
             const int err = errno;
@@ -125,7 +125,7 @@ int main() {
 
         Neon::network("Listening socket ready");
 
-        Neon::network("Listening on 127.0.0.1:8080");
+        Neon::network("Listening on 0.0.0.0:8080");
 
         while (true) {
             int client = accept(server, nullptr, nullptr);

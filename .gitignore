@@ -5,3 +5,7 @@ cmake-build-*/
 *.so
 *.log
 received_images/
+
+/build/
+*.bak
+received_images/

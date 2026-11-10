@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "library.hpp"
 #include "image.hpp"
 #include "logger.hpp"
@@ -73,7 +74,7 @@ static void transmit_image(int fd, Neon::Stats& stats,
     Neon::send("Image transmitted successfully");
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     int sock = -1;
 
     try {
@@ -90,9 +91,12 @@ int main() {
         sockaddr_in server{};
         server.sin_family = AF_INET;
         server.sin_port = htons(PORT);
-        inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
+        const char* server_ip = argc > 1 ? argv[1] : "127.0.0.1";
+        if (inet_pton(AF_INET, server_ip, &server.sin_addr) != 1)
+            throw std::runtime_error("Invalid IPv4 address");
 
-        Neon::network("Connecting to 127.0.0.1:8080");
+        Neon::network(std::string("Connecting to ") +
+                     server_ip + ":8080");
 
         if (connect(sock, reinterpret_cast<sockaddr*>(&server),
                     sizeof(server)) < 0)

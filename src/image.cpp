@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "image.hpp"
 
 #include <openssl/evp.h>

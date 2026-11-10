@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "library.hpp"
 #include "logger.hpp"
 

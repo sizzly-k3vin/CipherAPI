@@ -16,6 +16,7 @@ add_library(cipher_core STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/library.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/profile.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/image.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/video.cpp"
 )
 
 target_include_directories(cipher_core PUBLIC ${CIPHERAPI_INCLUDE_DIRS})

@@ -14,18 +14,28 @@ enum FrameType : uint8_t {
     TEXT = 1,
     IMAGE = 2,
     FAST_TEXT = 3,
-    RAW_IMAGE = 4
+    RAW_IMAGE = 4,
+    VIDEO_START = 5,
+    VIDEO_DATA = 6,
+    VIDEO_END = 7
 };
 
 constexpr uint32_t MAX_TEXT_FRAME = 1024 * 1024;
 constexpr uint32_t MAX_IMAGE_FRAME = 32 * 1024 * 1024;
+constexpr uint32_t MAX_VIDEO_FRAME = 4 * 1024 * 1024;
 
 inline bool valid_type(uint8_t type) {
     return type == TEXT || type == IMAGE ||
-           type == FAST_TEXT || type == RAW_IMAGE;
+           type == FAST_TEXT || type == RAW_IMAGE ||
+           type == VIDEO_START || type == VIDEO_DATA ||
+           type == VIDEO_END;
 }
 
 inline uint32_t frame_limit(uint8_t type) {
+    if (type == VIDEO_START || type == VIDEO_DATA ||
+        type == VIDEO_END)
+        return MAX_VIDEO_FRAME;
+
     return (type == IMAGE || type == RAW_IMAGE)
         ? MAX_IMAGE_FRAME : MAX_TEXT_FRAME;
 }

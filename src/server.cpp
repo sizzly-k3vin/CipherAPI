@@ -4,7 +4,7 @@
 #include "logger.hpp"
 #include "transport.hpp"
 #include "neon.hpp"
-
+#include "video.hpp"
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -93,6 +93,37 @@ static void transmit_raw_image(int fd, Neon::Stats& stats,
     Neon::send("Raw image transmitted (no SHA-256)");
 }
 
+
+static void transmit_video(int fd, const LibraryManager& libraries,
+                           Neon::Stats& stats, const std::string& path,
+                           bool use_sha256) {
+    const auto start = std::chrono::steady_clock::now();
+
+    auto result = CipherVideo::send_file(
+        fd, libraries, path, use_sha256
+    );
+
+    const auto end = std::chrono::steady_clock::now();
+    const double seconds =
+        std::chrono::duration<double>(end - start).count();
+
+    ++stats.sent_messages;
+    stats.sent_bytes += result.wire_bytes;
+
+    Neon::info(
+        "CVS/1 | " + std::to_string(result.original_bytes) +
+        " original bytes | " + std::to_string(result.wire_bytes) +
+        " wire bytes | " + std::to_string(result.chunks) +
+        " chunks | " + std::to_string(seconds) + " seconds"
+    );
+
+    Neon::send(
+        use_sha256
+            ? "Video transmitted with SHA-256"
+            : "Video transmitted without SHA-256"
+    );
+}
+
 int main() {
     int server = -1;
 
@@ -163,6 +194,7 @@ int main() {
             std::atomic<bool> connected{true};
 
             std::thread receiver([&]() {
+                CipherVideo::Receiver video_receiver(libraries);
                 try {
                     uint8_t type = 0;
                     std::string payload;
@@ -247,6 +279,20 @@ int main() {
 
                         }
 
+                        else if (type == CipherTransport::VIDEO_START ||
+                                 type == CipherTransport::VIDEO_DATA ||
+                                 type == CipherTransport::VIDEO_END) {
+                            if (type == CipherTransport::VIDEO_START)
+                                Neon::receive("CVS/1 video transfer started");
+
+                            std::string saved = video_receiver.handle(type, payload);
+
+                            if (!saved.empty()) {
+                                ++stats.received_messages;
+                                Neon::decode("CVS/1 video reconstructed");
+                                Neon::print_message("VIDEO", "Saved to " + saved);
+                            }
+                        }
                         else if (type == CipherTransport::IMAGE) {
                             Neon::receive(
                                 "Binary image packet | " +
@@ -330,6 +376,22 @@ int main() {
                 }
 
 
+
+                if (message.rfind("/sendvid ", 0) == 0) {
+                    std::string argument = message.substr(9);
+                    bool no_sha = argument.rfind("-f ", 0) == 0;
+                    std::string path = no_sha ? argument.substr(3) : argument;
+
+                    if (path.size() >= 2 && path.front() == '"' && path.back() == '"')
+                        path = path.substr(1, path.size() - 2);
+
+                    try {
+                        transmit_video(client, libraries, stats, path, !no_sha);
+                    } catch (const std::exception& e) {
+                        Neon::error(e.what());
+                    }
+                    continue;
+                }
 
                 if (message.rfind("/sendimg ", 0) == 0) {
                     bool raw = message.rfind("/sendimg -f ", 0) == 0;

@@ -44,6 +44,18 @@ static void transmit(int fd, LibraryManager& libraries,
     Neon::send("Text frame transmitted");
 }
 
+static void transmit_fast(int fd, Neon::Stats& stats,
+                          const std::string& message) {
+    CipherTransport::send_frame(fd, CipherTransport::FAST_TEXT, message);
+
+    ++stats.sent_messages;
+    stats.sent_chars += message.size();
+    stats.sent_bytes += message.size();
+
+    Neon::info("FAST text | " + std::to_string(message.size()) + " raw bytes");
+    Neon::send("Binary text frame transmitted");
+}
+
 static void transmit_image(int fd, Neon::Stats& stats,
                            const std::string& path) {
     const auto start = std::chrono::steady_clock::now();
@@ -72,6 +84,30 @@ static void transmit_image(int fd, Neon::Stats& stats,
     );
 
     Neon::send("Image transmitted successfully");
+}
+
+static void transmit_raw_image(int fd, Neon::Stats& stats,
+                               const std::string& path) {
+    const auto start = std::chrono::steady_clock::now();
+
+    std::string packet = ImageLibrary::pack_raw(path);
+    const auto packed = std::chrono::steady_clock::now();
+
+    CipherTransport::send_frame(fd, CipherTransport::RAW_IMAGE, packet);
+    const auto sent = std::chrono::steady_clock::now();
+
+    double pack_ms =
+        std::chrono::duration<double, std::milli>(packed - start).count();
+    double send_ms =
+        std::chrono::duration<double, std::milli>(sent - packed).count();
+
+    ++stats.sent_messages;
+    stats.sent_bytes += packet.size();
+
+    Neon::info("RAW image | " + std::to_string(packet.size()) +
+               " bytes | pack " + std::to_string(pack_ms) +
+               " ms | send " + std::to_string(send_ms) + " ms");
+    Neon::send("Raw image transmitted (no SHA-256)");
 }
 
 int main(int argc, char* argv[]) {
@@ -107,6 +143,7 @@ int main(int argc, char* argv[]) {
         Neon::show_help_hint();
 
         Neon::Stats stats;
+            bool fast_mode = false;
         std::atomic<bool> connected{true};
 
         std::thread receiver([&]() {
@@ -151,7 +188,32 @@ int main(int argc, char* argv[]) {
                             break;
                         }
                     }
-                    else if (type == CipherTransport::IMAGE) {
+                    else if (type == CipherTransport::FAST_TEXT) {
+                            ++stats.received_messages;
+                            stats.received_chars += payload.size();
+                            Neon::receive("FAST text | " +
+                                          std::to_string(payload.size()) +
+                                          " raw bytes");
+                            Neon::print_message("PEER", payload);
+
+                            if (payload == "/quit") {
+                                connected = false;
+                                shutdown(sock, SHUT_RDWR);
+                                break;
+                            }
+                        }
+                        else if (type == CipherTransport::RAW_IMAGE) {
+                            Neon::receive("Raw image | " +
+                                          std::to_string(payload.size()) +
+                                          " bytes | no checksum");
+
+                            std::string saved = ImageLibrary::unpack_raw(payload);
+                            ++stats.received_messages;
+
+                            Neon::info("Raw image saved without SHA-256 verification");
+                            Neon::print_message("IMAGE", "Saved to " + saved);
+                        }
+                        else if (type == CipherTransport::IMAGE) {
                         Neon::receive(
                             "Binary image packet | " +
                             std::to_string(payload.size()) + " bytes"
@@ -216,8 +278,17 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
+            if (message == "/fast") {
+                fast_mode = !fast_mode;
+                Neon::info(std::string("FAST binary text mode ") +
+                           (fast_mode ? "ENABLED" : "DISABLED"));
+                continue;
+            }
+
             if (message.rfind("/sendimg ", 0) == 0) {
-                std::string path = message.substr(9);
+                std::string argument = message.substr(9);
+                bool raw_mode = argument.rfind("-f ", 0) == 0;
+                std::string path = raw_mode ? argument.substr(3) : argument;
 
                 if (path.size() >= 2 &&
                     path.front() == '"' && path.back() == '"') {
@@ -225,7 +296,10 @@ int main(int argc, char* argv[]) {
                 }
 
                 try {
-                    transmit_image(sock, stats, path);
+                    if (raw_mode)
+                        transmit_raw_image(sock, stats, path);
+                    else
+                        transmit_image(sock, stats, path);
                 } catch (const std::exception& e) {
                     Neon::error(e.what());
                 }
@@ -235,7 +309,10 @@ int main(int argc, char* argv[]) {
             if (!connected) break;
 
             try {
-                transmit(sock, libraries, stats, message);
+                if (fast_mode)
+                    transmit_fast(sock, stats, message);
+                else
+                    transmit(sock, libraries, stats, message);
             } catch (const std::exception& e) {
                 Neon::error(e.what());
                 connected = false;

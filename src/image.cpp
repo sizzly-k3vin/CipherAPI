@@ -173,4 +173,92 @@ std::string unpack(const std::string& packet,
     return destination.string();
 }
 
+
+
+std::string pack_raw(const std::string& path) {
+    fs::path source(path);
+
+    if (!fs::exists(source) || !fs::is_regular_file(source))
+        throw std::runtime_error("Image file not found");
+
+    std::string filename = source.filename().string();
+
+    if (filename.empty() || filename.size() > 255 ||
+        !valid_image_extension(filename))
+        throw std::runtime_error("Invalid image filename");
+
+    const auto size = fs::file_size(source);
+    if (size == 0 || size > MAX_IMAGE_SIZE - 257)
+        throw std::runtime_error("Raw image exceeds size limit or is empty");
+
+    std::ifstream file(source, std::ios::binary);
+    if (!file) throw std::runtime_error("Could not open image");
+
+    std::string bytes{
+        std::istreambuf_iterator<char>(file),
+        std::istreambuf_iterator<char>()
+    };
+
+    if (file.bad() || bytes.empty())
+        throw std::runtime_error("Image read failed");
+
+    std::string packet;
+    uint16_t n = static_cast<uint16_t>(filename.size());
+
+    packet.push_back(static_cast<char>((n >> 8) & 0xff));
+    packet.push_back(static_cast<char>(n & 0xff));
+    packet += filename;
+    packet += bytes;
+
+    return packet;
+}
+
+std::string unpack_raw(const std::string& packet,
+                       const std::string& output_directory) {
+    if (packet.size() < 3)
+        throw std::runtime_error("Raw image packet is too small");
+
+    uint16_t name_length = read_u16(packet, 0);
+
+    if (name_length == 0 || name_length > 255 ||
+        packet.size() <= 2 + name_length)
+        throw std::runtime_error("Invalid raw image metadata");
+
+    std::string filename = packet.substr(2, name_length);
+
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    filename = fs::path(filename).filename().string();
+
+    if (filename.empty() || !valid_image_extension(filename))
+        throw std::runtime_error("Invalid received image filename");
+
+    const std::size_t offset = 2 + name_length;
+    const std::size_t image_size = packet.size() - offset;
+
+    if (image_size > MAX_IMAGE_SIZE)
+        throw std::runtime_error("Raw image exceeds size limit");
+
+    fs::create_directories(output_directory);
+
+    fs::path destination =
+        fs::path(output_directory) / ("received_" + filename);
+
+    for (unsigned int i = 1; fs::exists(destination); ++i) {
+        destination = fs::path(output_directory) /
+            ("received_" + std::to_string(i) + "_" + filename);
+    }
+
+    std::ofstream output(destination, std::ios::binary);
+    if (!output)
+        throw std::runtime_error("Could not create received image");
+
+    output.write(packet.data() + offset,
+                 static_cast<std::streamsize>(image_size));
+
+    if (!output)
+        throw std::runtime_error("Raw image write failed");
+
+    return destination.string();
+}
+
 }

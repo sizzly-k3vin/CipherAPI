@@ -75,6 +75,24 @@ static void transmit_image(int fd, Neon::Stats& stats,
     Neon::send("Image transmitted successfully");
 }
 
+static void transmit_fast(int fd, Neon::Stats& stats,
+                           const std::string& message) {
+    CipherTransport::send_frame(fd, CipherTransport::FAST_TEXT, message);
+    ++stats.sent_messages;
+    stats.sent_chars += message.size();
+    stats.sent_bytes += message.size();
+    Neon::send("Raw text frame transmitted");
+}
+
+static void transmit_raw_image(int fd, Neon::Stats& stats,
+                               const std::string& path) {
+    std::string packet = ImageLibrary::pack_raw(path);
+    CipherTransport::send_frame(fd, CipherTransport::RAW_IMAGE, packet);
+    ++stats.sent_messages;
+    stats.sent_bytes += packet.size();
+    Neon::send("Raw image transmitted (no SHA-256)");
+}
+
 int main() {
     int server = -1;
 
@@ -141,6 +159,7 @@ int main() {
             Neon::show_help_hint();
 
             Neon::Stats stats;
+            bool fast_mode = false;
             std::atomic<bool> connected{true};
 
             std::thread receiver([&]() {
@@ -194,6 +213,40 @@ int main() {
                                 break;
                             }
                         }
+                        else if (type == CipherTransport::FAST_TEXT) {
+
+                            ++stats.received_messages;
+
+                            stats.received_chars += payload.size();
+
+                            Neon::receive("Raw text | " + std::to_string(payload.size()) + " bytes");
+
+                            Neon::print_message("CLIENT", payload);
+
+                            if (payload == "/quit") {
+
+                                connected = false;
+
+                                shutdown(client, SHUT_RDWR);
+
+                                break;
+
+                            }
+
+                        }
+
+                        else if (type == CipherTransport::RAW_IMAGE) {
+
+                            Neon::receive("Raw image packet | " + std::to_string(payload.size()) + " bytes");
+
+                            std::string saved = ImageLibrary::unpack_raw(payload);
+
+                            ++stats.received_messages;
+
+                            Neon::print_message("IMAGE", "Saved to " + saved + " (no checksum)");
+
+                        }
+
                         else if (type == CipherTransport::IMAGE) {
                             Neon::receive(
                                 "Binary image packet | " +
@@ -259,8 +312,28 @@ int main() {
                     continue;
                 }
 
+                if (message == "/fast") {
+
+
+                    fast_mode = !fast_mode;
+
+
+                    Neon::info(std::string("Raw text mode ") +
+
+
+                               (fast_mode ? "ENABLED" : "DISABLED"));
+
+
+                    continue;
+
+
+                }
+
+
+
                 if (message.rfind("/sendimg ", 0) == 0) {
-                    std::string path = message.substr(9);
+                    bool raw = message.rfind("/sendimg -f ", 0) == 0;
+                    std::string path = raw ? message.substr(12) : message.substr(9);
 
                     if (path.size() >= 2 &&
                         path.front() == '"' && path.back() == '"') {
@@ -268,7 +341,10 @@ int main() {
                     }
 
                     try {
-                        transmit_image(client, stats, path);
+                        if (raw)
+                            transmit_raw_image(client, stats, path);
+                        else
+                            transmit_image(client, stats, path);
                     } catch (const std::exception& e) {
                         Neon::error(e.what());
                     }
@@ -278,7 +354,10 @@ int main() {
                 if (!connected) break;
 
                 try {
-                    transmit(client, libraries, stats, message);
+                    if (fast_mode)
+                        transmit_fast(client, stats, message);
+                    else
+                        transmit(client, libraries, stats, message);
                 } catch (const std::exception& e) {
                     Neon::error(e.what());
                     connected = false;

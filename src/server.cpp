@@ -5,452 +5,513 @@
 #include "transport.hpp"
 #include "neon.hpp"
 #include "video.hpp"
+
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 #include <atomic>
 #include <chrono>
-#include <cerrno>
+#include <filesystem>
 #include <iostream>
-#include <stdexcept>
+#include <memory>
+#include <mutex>
+#include <sstream>
 #include <string>
 #include <thread>
+#include <vector>
 
-constexpr uint16_t PORT = 8080;
+struct Client {
+    int id;
+    int fd;
+    std::atomic<bool> connected{true};
+    std::atomic<bool> fast{false};
+    Neon::Stats stats;
+    std::mutex send_mutex;
+    std::thread receiver;
+};
 
-static void transmit(int fd, LibraryManager& libraries,
-                     Neon::Stats& stats, const std::string& message) {
-    const auto start = std::chrono::steady_clock::now();
-    std::string encoded = libraries.encode(message);
-    const auto end = std::chrono::steady_clock::now();
+static std::atomic<bool> running{true};
+static std::mutex clients_mutex;
+static std::vector<std::shared_ptr<Client>> clients;
 
-    const double ms =
-        std::chrono::duration<double, std::milli>(end - start).count();
-
-    Neon::encode(
-        std::to_string(message.size()) + " chars | " +
-        std::to_string(encoded.size() / 64) + " tokens | " +
-        std::to_string(encoded.size()) + " bytes | " +
-        std::to_string(ms) + " ms"
-    );
-
-    CipherTransport::send_frame(fd, CipherTransport::TEXT, encoded);
-
-    ++stats.sent_messages;
-    stats.sent_chars += message.size();
-    stats.sent_tokens += encoded.size() / 64;
-    stats.sent_bytes += encoded.size();
-
-    Neon::send("Text frame transmitted");
+static void disconnect_client(const std::shared_ptr<Client>& c) {
+    if (c->connected.exchange(false))
+        shutdown(c->fd, SHUT_RDWR);
 }
 
-static void transmit_image(int fd, Neon::Stats& stats,
-                           const std::string& path) {
-    const auto start = std::chrono::steady_clock::now();
+static void send_text(
+    const std::shared_ptr<Client>& c,
+    const LibraryManager& libraries,
+    const std::string& message
+) {
+    std::lock_guard<std::mutex> lock(c->send_mutex);
 
-    std::string packet = ImageLibrary::pack(path);
+    if (!c->connected)
+        throw std::runtime_error("Client disconnected");
 
-    const auto packed = std::chrono::steady_clock::now();
+    std::string payload = c->fast
+        ? message
+        : libraries.encode(message);
 
-    CipherTransport::send_frame(fd, CipherTransport::IMAGE, packet);
+    auto type = c->fast
+        ? CipherTransport::FAST_TEXT
+        : CipherTransport::TEXT;
 
-    const auto sent = std::chrono::steady_clock::now();
+    if (!CipherTransport::send_frame(c->fd, type, payload))
+        throw std::runtime_error("Send failed");
 
-    const double pack_ms =
-        std::chrono::duration<double, std::milli>(packed - start).count();
+    ++c->stats.sent_messages;
+    c->stats.sent_chars += message.size();
+    c->stats.sent_bytes += payload.size();
 
-    const double send_ms =
-        std::chrono::duration<double, std::milli>(sent - packed).count();
-
-    ++stats.sent_messages;
-    stats.sent_bytes += packet.size();
-
-    Neon::info(
-        "Image packet | " + std::to_string(packet.size()) +
-        " bytes | pack " + std::to_string(pack_ms) +
-        " ms | send " + std::to_string(send_ms) + " ms"
-    );
-
-    Neon::send("Image transmitted successfully");
+    Neon::print_message("SERVER -> CLIENT " +
+                        std::to_string(c->id), message);
 }
 
-static void transmit_fast(int fd, Neon::Stats& stats,
-                           const std::string& message) {
-    CipherTransport::send_frame(fd, CipherTransport::FAST_TEXT, message);
-    ++stats.sent_messages;
-    stats.sent_chars += message.size();
-    stats.sent_bytes += message.size();
-    Neon::send("Raw text frame transmitted");
+static void receive_client(
+    std::shared_ptr<Client> c,
+    const LibraryManager& libraries
+) {
+    CipherVideo::Receiver video_receiver(libraries);
+
+    try {
+        while (running && c->connected) {
+            uint8_t type = 0;
+            std::string payload;
+
+            if (!CipherTransport::receive_frame(c->fd, type, payload))
+                break;
+
+            ++c->stats.received_bytes;
+            c->stats.received_bytes += payload.size();
+
+            if (type == CipherTransport::TEXT) {
+                std::string message = libraries.decode(payload);
+                ++c->stats.received_messages;
+                c->stats.received_chars += message.size();
+                Neon::decode("CLIENT " + std::to_string(c->id),
+                             message);
+                Neon::print_message("CLIENT " +
+                                    std::to_string(c->id), message);
+
+                if (message == "/quit")
+                    break;
+            }
+            else if (type == CipherTransport::FAST_TEXT) {
+                ++c->stats.received_messages;
+                c->stats.received_chars += payload.size();
+                Neon::print_message("CLIENT " +
+                                    std::to_string(c->id), payload);
+
+                if (payload == "/quit")
+                    break;
+            }
+            else if (type == CipherTransport::IMAGE) {
+                std::filesystem::path dir =
+                    "received_images/client_" + std::to_string(c->id);
+                std::filesystem::create_directories(dir);
+                std::string path =
+                    ImageLibrary::unpack(payload, dir.string());
+                Neon::info("Image received: " + path);
+            }
+            else if (type == CipherTransport::RAW_IMAGE) {
+                std::filesystem::path dir =
+                    "received_images/client_" + std::to_string(c->id);
+                std::filesystem::create_directories(dir);
+                std::string path =
+                    ImageLibrary::unpack_raw(payload, dir.string());
+                Neon::info("Raw image received: " + path);
+            }
+            else if (type >= CipherTransport::VIDEO_START &&
+                     type <= CipherTransport::VIDEO_END) {
+                std::string result = video_receiver.handle(type, payload);
+                if (!result.empty())
+                    Neon::info("Video received: " + result);
+            }
+            else {
+                Neon::error("Unknown frame from client " +
+                            std::to_string(c->id));
+            }
+        }
+    }
+    catch (const std::exception& e) {
+        Neon::error("Client " + std::to_string(c->id) +
+                    ": " + e.what());
+    }
+
+    disconnect_client(c);
+    Neon::info("Client " + std::to_string(c->id) + " disconnected");
 }
 
-static void transmit_raw_image(int fd, Neon::Stats& stats,
-                               const std::string& path) {
-    std::string packet = ImageLibrary::pack_raw(path);
-    CipherTransport::send_frame(fd, CipherTransport::RAW_IMAGE, packet);
-    ++stats.sent_messages;
-    stats.sent_bytes += packet.size();
-    Neon::send("Raw image transmitted (no SHA-256)");
+static std::shared_ptr<Client> find_client(int id) {
+    std::lock_guard<std::mutex> lock(clients_mutex);
+
+    for (auto& c : clients)
+        if (c->id == id && c->connected)
+            return c;
+
+    return nullptr;
 }
 
+static void cleanup_clients() {
+    std::vector<std::shared_ptr<Client>> dead;
 
-static void transmit_video(int fd, const LibraryManager& libraries,
-                           Neon::Stats& stats, const std::string& path,
-                           bool use_sha256) {
-    const auto start = std::chrono::steady_clock::now();
+    {
+        std::lock_guard<std::mutex> lock(clients_mutex);
 
-    auto result = CipherVideo::send_file(
-        fd, libraries, path, use_sha256
-    );
+        for (auto it = clients.begin(); it != clients.end();) {
+            if (!(*it)->connected) {
+                dead.push_back(*it);
+                it = clients.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 
-    const auto end = std::chrono::steady_clock::now();
-    const double seconds =
-        std::chrono::duration<double>(end - start).count();
+    for (auto& c : dead) {
+        if (c->receiver.joinable())
+            c->receiver.join();
 
-    ++stats.sent_messages;
-    stats.sent_bytes += result.wire_bytes;
+        close(c->fd);
+    }
+}
 
-    Neon::info(
-        "CVS/1 | " + std::to_string(result.original_bytes) +
-        " original bytes | " + std::to_string(result.wire_bytes) +
-        " wire bytes | " + std::to_string(result.chunks) +
-        " chunks | " + std::to_string(seconds) + " seconds"
-    );
+static void transmit_image(
+    const std::shared_ptr<Client>& c,
+    const std::string& path,
+    bool raw
+) {
+    std::lock_guard<std::mutex> lock(c->send_mutex);
 
-    Neon::send(
-        use_sha256
-            ? "Video transmitted with SHA-256"
-            : "Video transmitted without SHA-256"
-    );
+    if (!c->connected)
+        throw std::runtime_error("Client disconnected");
+
+    std::string packet = raw
+        ? ImageLibrary::pack_raw(path)
+        : ImageLibrary::pack(path);
+
+    auto type = raw
+        ? CipherTransport::RAW_IMAGE
+        : CipherTransport::IMAGE;
+
+    if (!CipherTransport::send_frame(c->fd, type, packet))
+        throw std::runtime_error("Image send failed");
+
+    ++c->stats.sent_messages;
+    c->stats.sent_bytes += packet.size();
+}
+
+static void transmit_video(
+    const std::shared_ptr<Client>& c,
+    const LibraryManager& libraries,
+    const std::string& path,
+    bool sha
+) {
+    std::lock_guard<std::mutex> lock(c->send_mutex);
+
+    if (!c->connected)
+        throw std::runtime_error("Client disconnected");
+
+    CipherVideo::send_file(c->fd, libraries, path, sha);
+}
+
+static void show_clients() {
+    std::lock_guard<std::mutex> lock(clients_mutex);
+
+    std::cout << "\n--- ACTIVE CLIENTS ---\n";
+
+    for (const auto& c : clients) {
+        if (c->connected)
+            std::cout << "ID " << c->id
+                      << " | " << (c->fast ? "FAST" : "ENCODED")
+                      << '\n';
+    }
+
+    std::cout << "----------------------\n";
 }
 
 int main() {
-    int server = -1;
-
     try {
-        Neon::banner("SERVER");
-
         LibraryManager libraries("libraries");
-        Neon::info("Translation engine initialized");
-        Neon::info("Binary image transport initialized");
 
-        server = socket(AF_INET, SOCK_STREAM, 0);
-        if (server < 0) {
-            const int err = errno;
-            CipherLog::system_error("NET-001", "socket()", err);
-            throw std::runtime_error("Server socket initialization failed");
-        }
+        int server = socket(AF_INET, SOCK_STREAM, 0);
+        if (server < 0)
+            throw std::runtime_error("Socket creation failed");
 
-        Neon::network("TCP socket created");
-
-        int reuse = 1;
-        if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR,
-                       &reuse, sizeof(reuse)) < 0) {
-            const int err = errno;
-            CipherLog::system_error("NET-008", "setsockopt()", err);
-            throw std::runtime_error("Socket configuration failed");
-        }
-
-        Neon::network("SO_REUSEADDR enabled");
+        int opt = 1;
+        setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
         sockaddr_in address{};
         address.sin_family = AF_INET;
-        address.sin_port = htons(PORT);
-        address.sin_addr.s_addr = htonl(INADDR_ANY);
+        address.sin_addr.s_addr = INADDR_ANY;
+        address.sin_port = htons(8080);
 
         if (bind(server, reinterpret_cast<sockaddr*>(&address),
-                 sizeof(address)) < 0) {
-            const int err = errno;
-            CipherLog::system_error("NET-002", "bind(127.0.0.1:8080)", err);
-            throw std::runtime_error("Server bind failed");
-        }
+                 sizeof(address)) < 0)
+            throw std::runtime_error("Bind failed");
 
-        Neon::network("Socket bound to 0.0.0.0:8080");
+        if (listen(server, 20) < 0)
+            throw std::runtime_error("Listen failed");
 
-        if (listen(server, 5) < 0) {
-            const int err = errno;
-            CipherLog::system_error("NET-003", "listen()", err);
-            throw std::runtime_error("Server listen failed");
-        }
+        Neon::banner();
+        Neon::info("CipherAPI multi-client server started on port 8080");
 
-        Neon::network("Listening socket ready");
+        std::thread accept_thread([&]() {
+            int next_id = 1;
 
-        Neon::network("Listening on 0.0.0.0:8080");
+            while (running) {
+                pollfd pfd{server, POLLIN, 0};
+                int ready = poll(&pfd, 1, 500);
 
-        while (true) {
-            int client = accept(server, nullptr, nullptr);
-
-            if (client < 0) {
-                if (errno == EINTR) continue;
-                throw std::runtime_error("Accept failed");
-            }
-
-            Neon::network("Client connected");
-            Neon::info("Full-duplex text + binary session started");
-            Neon::show_help_hint();
-
-            Neon::Stats stats;
-            bool fast_mode = false;
-            std::atomic<bool> connected{true};
-
-            std::thread receiver([&]() {
-                CipherVideo::Receiver video_receiver(libraries);
-                try {
-                    uint8_t type = 0;
-                    std::string payload;
-
-                    while (connected &&
-                           CipherTransport::receive_frame(
-                               client, type, payload)) {
-                        stats.received_bytes += payload.size();
-
-                        if (type == CipherTransport::TEXT) {
-                            stats.received_tokens += payload.size() / 64;
-
-                            Neon::receive(
-                                std::to_string(payload.size()) +
-                                " bytes | " +
-                                std::to_string(payload.size() / 64) +
-                                " tokens"
-                            );
-
-                            const auto start =
-                                std::chrono::steady_clock::now();
-
-                            std::string message =
-                                libraries.decode(payload);
-
-                            const auto end =
-                                std::chrono::steady_clock::now();
-
-                            const double ms =
-                                std::chrono::duration<double, std::milli>(
-                                    end - start).count();
-
-                            ++stats.received_messages;
-                            stats.received_chars += message.size();
-
-                            Neon::decode(
-                                std::to_string(payload.size() / 64) +
-                                " tokens -> " +
-                                std::to_string(message.size()) +
-                                " chars | " + std::to_string(ms) + " ms"
-                            );
-
-                            Neon::print_message("CLIENT", message);
-
-                            if (message == "/quit") {
-                                connected = false;
-                                shutdown(client, SHUT_RDWR);
-                                break;
-                            }
-                        }
-                        else if (type == CipherTransport::FAST_TEXT) {
-
-                            ++stats.received_messages;
-
-                            stats.received_chars += payload.size();
-
-                            Neon::receive("Raw text | " + std::to_string(payload.size()) + " bytes");
-
-                            Neon::print_message("CLIENT", payload);
-
-                            if (payload == "/quit") {
-
-                                connected = false;
-
-                                shutdown(client, SHUT_RDWR);
-
-                                break;
-
-                            }
-
-                        }
-
-                        else if (type == CipherTransport::RAW_IMAGE) {
-
-                            Neon::receive("Raw image packet | " + std::to_string(payload.size()) + " bytes");
-
-                            std::string saved = ImageLibrary::unpack_raw(payload);
-
-                            ++stats.received_messages;
-
-                            Neon::print_message("IMAGE", "Saved to " + saved + " (no checksum)");
-
-                        }
-
-                        else if (type == CipherTransport::VIDEO_START ||
-                                 type == CipherTransport::VIDEO_DATA ||
-                                 type == CipherTransport::VIDEO_END) {
-                            if (type == CipherTransport::VIDEO_START)
-                                Neon::receive("CVS/1 video transfer started");
-
-                            std::string saved = video_receiver.handle(type, payload);
-
-                            if (!saved.empty()) {
-                                ++stats.received_messages;
-                                Neon::decode("CVS/1 video reconstructed");
-                                Neon::print_message("VIDEO", "Saved to " + saved);
-                            }
-                        }
-                        else if (type == CipherTransport::IMAGE) {
-                            Neon::receive(
-                                "Binary image packet | " +
-                                std::to_string(payload.size()) + " bytes"
-                            );
-
-                            const auto start =
-                                std::chrono::steady_clock::now();
-
-                            std::string saved =
-                                ImageLibrary::unpack(payload);
-
-                            const auto end =
-                                std::chrono::steady_clock::now();
-
-                            const double ms =
-                                std::chrono::duration<double, std::milli>(
-                                    end - start).count();
-
-                            ++stats.received_messages;
-
-                            Neon::decode(
-                                "SHA-256 verified | " +
-                                std::to_string(payload.size()) +
-                                " bytes | " + std::to_string(ms) + " ms"
-                            );
-
-                            Neon::print_message("IMAGE", "Saved to " + saved);
-                        }
-                    }
-                } catch (const std::exception& e) {
-                    if (connected) Neon::error(e.what());
-                }
-
-                connected = false;
-                shutdown(client, SHUT_RDWR);
-                Neon::network("Client receive channel closed");
-            });
-
-            std::string message;
-
-            while (connected) {
-                Neon::prompt("SERVER");
-
-                if (!std::getline(std::cin, message)) {
-                    connected = false;
-                    shutdown(client, SHUT_RDWR);
+                if (!running)
                     break;
-                }
 
-                if (message == "/help") {
-                    Neon::help();
-                    continue;
-                }
-
-                if (message == "/stats") {
-                    Neon::show_stats(stats);
-                    continue;
-                }
-
-                if (message == "/clear") {
-                    Neon::clear();
-                    continue;
-                }
-
-                if (message == "/fast") {
-
-
-                    fast_mode = !fast_mode;
-
-
-                    Neon::info(std::string("Raw text mode ") +
-
-
-                               (fast_mode ? "ENABLED" : "DISABLED"));
-
-
+                if (ready <= 0)
                     continue;
 
+                sockaddr_in client_addr{};
+                socklen_t len = sizeof(client_addr);
 
+                int fd = accept(server,
+                    reinterpret_cast<sockaddr*>(&client_addr), &len);
+
+                if (fd < 0)
+                    continue;
+
+                auto c = std::make_shared<Client>();
+                c->id = next_id++;
+                c->fd = fd;
+
+                c->receiver = std::thread(
+                    receive_client, c, std::cref(libraries));
+
+                {
+                    std::lock_guard<std::mutex> lock(clients_mutex);
+                    clients.push_back(c);
                 }
 
+                Neon::info("Client " + std::to_string(c->id) +
+                           " connected from " +
+                           std::string(inet_ntoa(client_addr.sin_addr)));
+            }
+        });
 
+        int selected_id = -1;
+        std::string line;
 
-                if (message.rfind("/sendvid ", 0) == 0) {
-                    std::string argument = message.substr(9);
-                    bool no_sha = argument.rfind("-f ", 0) == 0;
-                    std::string path = no_sha ? argument.substr(3) : argument;
+        Neon::info("Type /help for commands");
 
-                    if (path.size() >= 2 && path.front() == '"' && path.back() == '"')
-                        path = path.substr(1, path.size() - 2);
+        while (running) {
+            cleanup_clients();
 
-                    try {
-                        transmit_video(client, libraries, stats, path, !no_sha);
-                    } catch (const std::exception& e) {
-                        Neon::error(e.what());
+            std::cout << "CipherAPI";
+            if (selected_id != -1)
+                std::cout << "[" << selected_id << "]";
+            std::cout << "> " << std::flush;
+
+            if (!std::getline(std::cin, line))
+                break;
+
+            if (line.empty())
+                continue;
+
+            std::istringstream input(line);
+            std::string command;
+            input >> command;
+
+            try {
+                if (command == "/help") {
+                    std::cout
+                        << "\n/help                 Show commands\n"
+                        << "/clients              List clients\n"
+                        << "/use ID               Select client\n"
+                        << "/to ID MESSAGE        Direct message\n"
+                        << "/broadcast MESSAGE    Send to everyone\n"
+                        << "/stats                Selected client stats\n"
+                        << "/fast                 Toggle fast mode\n"
+                        << "/sendimg FILE         Send image\n"
+                        << "/sendimg -f FILE      Send raw image\n"
+                        << "/sendvid FILE         Send video\n"
+                        << "/sendvid -f FILE      Send video with SHA-256\n"
+                        << "/quit                 Disconnect selected client\n"
+                        << "/shutdown             Stop server\n";
+                }
+                else if (command == "/clients") {
+                    show_clients();
+                }
+                else if (command == "/use") {
+                    int id;
+                    if (!(input >> id)) {
+                        Neon::error("Usage: /use ID");
+                        continue;
                     }
-                    continue;
+
+                    if (find_client(id)) {
+                        selected_id = id;
+                        Neon::info("Selected client " + std::to_string(id));
+                    } else {
+                        Neon::error("Client not found");
+                    }
                 }
-
-                if (message.rfind("/sendimg ", 0) == 0) {
-                    bool raw = message.rfind("/sendimg -f ", 0) == 0;
-                    std::string path = raw ? message.substr(12) : message.substr(9);
-
-                    if (path.size() >= 2 &&
-                        path.front() == '"' && path.back() == '"') {
-                        path = path.substr(1, path.size() - 2);
+                else if (command == "/to") {
+                    int id;
+                    if (!(input >> id)) {
+                        Neon::error("Usage: /to ID MESSAGE");
+                        continue;
                     }
 
-                    try {
-                        if (raw)
-                            transmit_raw_image(client, stats, path);
-                        else
-                            transmit_image(client, stats, path);
-                    } catch (const std::exception& e) {
-                        Neon::error(e.what());
+                    std::string message;
+                    std::getline(input >> std::ws, message);
+
+                    auto c = find_client(id);
+                    if (!c || message.empty()) {
+                        Neon::error("Client not found or message empty");
+                        continue;
                     }
-                    continue;
+
+                    send_text(c, libraries, message);
                 }
+                else if (command == "/broadcast") {
+                    std::string message;
+                    std::getline(input >> std::ws, message);
 
-                if (!connected) break;
+                    if (message.empty())
+                        continue;
 
-                try {
-                    if (fast_mode)
-                        transmit_fast(client, stats, message);
+                    std::vector<std::shared_ptr<Client>> snapshot;
+                    {
+                        std::lock_guard<std::mutex> lock(clients_mutex);
+                        snapshot = clients;
+                    }
+
+                    for (auto& c : snapshot) {
+                        if (!c->connected)
+                            continue;
+
+                        try {
+                            send_text(c, libraries, message);
+                        } catch (...) {
+                            disconnect_client(c);
+                        }
+                    }
+                }
+                else if (command == "/stats") {
+                    auto c = find_client(selected_id);
+                    if (c)
+                        Neon::show_stats(c->stats);
                     else
-                        transmit(client, libraries, stats, message);
-                } catch (const std::exception& e) {
-                    Neon::error(e.what());
-                    connected = false;
-                    shutdown(client, SHUT_RDWR);
+                        Neon::error("No active client selected");
+                }
+                else if (command == "/fast") {
+                    auto c = find_client(selected_id);
+                    if (!c) {
+                        Neon::error("Select a client first");
+                        continue;
+                    }
+
+                    c->fast = !c->fast;
+                    Neon::info(std::string("Fast mode: ") +
+                               (c->fast ? "ON" : "OFF"));
+                }
+                else if (command == "/sendimg" ||
+                         command == "/sendvid") {
+                    auto c = find_client(selected_id);
+                    if (!c) {
+                        Neon::error("Select a client first");
+                        continue;
+                    }
+
+                    std::string option, path;
+                    input >> option;
+
+                    bool raw = option == "-f";
+                    if (raw)
+                        input >> path;
+                    else
+                        path = option;
+
+                    if (path.empty()) {
+                        Neon::error("File path required");
+                        continue;
+                    }
+
+                    if (command == "/sendimg")
+                        transmit_image(c, path, raw);
+                    else
+                        transmit_video(c, libraries, path, raw);
+                }
+                else if (command == "/quit") {
+                    auto c = find_client(selected_id);
+                    if (!c) {
+                        Neon::error("No active client selected");
+                        continue;
+                    }
+
+                    try {
+                        send_text(c, libraries, "/quit");
+                    } catch (...) {}
+
+                    disconnect_client(c);
+                    selected_id = -1;
+                }
+                else if (command == "/shutdown") {
+                    running = false;
                     break;
                 }
+                else {
+                    auto c = find_client(selected_id);
+                    if (!c) {
+                        Neon::error("Select a client using /use ID");
+                        continue;
+                    }
 
-                if (message == "/quit") {
-                    connected = false;
-                    shutdown(client, SHUT_RDWR);
-                    break;
+                    send_text(c, libraries, line);
                 }
             }
+            catch (const std::exception& e) {
+                Neon::error(e.what());
 
-            if (receiver.joinable()) receiver.join();
+                auto c = find_client(selected_id);
+                if (c && !c->connected)
+                    selected_id = -1;
+            }
+        }
 
-            close(client);
+        running = false;
+        shutdown(server, SHUT_RDWR);
 
-            Neon::network("Client session ended");
-            Neon::show_stats(stats);
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex);
+            for (auto& c : clients)
+                disconnect_client(c);
+        }
+
+        if (accept_thread.joinable())
+            accept_thread.join();
+
+        cleanup_clients();
+
+        {
+            std::lock_guard<std::mutex> lock(clients_mutex);
+            for (auto& c : clients) {
+                disconnect_client(c);
+                if (c->receiver.joinable())
+                    c->receiver.join();
+                close(c->fd);
+            }
+            clients.clear();
         }
 
         close(server);
-        server = -1;
-
-    } catch (const std::exception& e) {
-        if (server >= 0) close(server);
-
-        Neon::error(e.what());
+        Neon::info("CipherAPI server stopped");
+        return 0;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "FATAL: " << e.what() << '\n';
         return 1;
     }
-
-    return 0;
 }

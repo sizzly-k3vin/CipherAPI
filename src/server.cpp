@@ -60,8 +60,7 @@ static void send_text(
         ? CipherTransport::FAST_TEXT
         : CipherTransport::TEXT;
 
-    if (!CipherTransport::send_frame(c->fd, type, payload))
-        throw std::runtime_error("Send failed");
+    CipherTransport::send_frame(c->fd, type, payload);
 
     ++c->stats.sent_messages;
     c->stats.sent_chars += message.size();
@@ -92,8 +91,7 @@ static void receive_client(
                 std::string message = libraries.decode(payload);
                 ++c->stats.received_messages;
                 c->stats.received_chars += message.size();
-                Neon::decode("CLIENT " + std::to_string(c->id),
-                             message);
+                Neon::decode("CLIENT " + std::to_string(c->id) + ": " + message);
                 Neon::print_message("CLIENT " +
                                     std::to_string(c->id), message);
 
@@ -198,8 +196,7 @@ static void transmit_image(
         ? CipherTransport::RAW_IMAGE
         : CipherTransport::IMAGE;
 
-    if (!CipherTransport::send_frame(c->fd, type, packet))
-        throw std::runtime_error("Image send failed");
+    CipherTransport::send_frame(c->fd, type, packet);
 
     ++c->stats.sent_messages;
     c->stats.sent_bytes += packet.size();
@@ -257,7 +254,7 @@ int main() {
         if (listen(server, 20) < 0)
             throw std::runtime_error("Listen failed");
 
-        Neon::banner();
+        Neon::banner("SERVER");
         Neon::info("CipherAPI multi-client server started on port 8080");
 
         std::thread accept_thread([&]() {

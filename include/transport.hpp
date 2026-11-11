@@ -17,7 +17,11 @@ enum FrameType : uint8_t {
     RAW_IMAGE = 4,
     VIDEO_START = 5,
     VIDEO_DATA = 6,
-    VIDEO_END = 7
+    VIDEO_END = 7,
+    AUTH_REGISTER = 8,
+    AUTH_LOGIN = 9,
+    AUTH_OK = 10,
+    AUTH_FAIL = 11
 };
 
 constexpr uint32_t MAX_TEXT_FRAME = 1024 * 1024;
@@ -28,7 +32,9 @@ inline bool valid_type(uint8_t type) {
     return type == TEXT || type == IMAGE ||
            type == FAST_TEXT || type == RAW_IMAGE ||
            type == VIDEO_START || type == VIDEO_DATA ||
-           type == VIDEO_END;
+           type == VIDEO_END || type == AUTH_REGISTER ||
+           type == AUTH_LOGIN || type == AUTH_OK ||
+           type == AUTH_FAIL;
 }
 
 inline uint32_t frame_limit(uint8_t type) {

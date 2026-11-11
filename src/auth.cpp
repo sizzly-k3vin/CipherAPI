@@ -1,0 +1,125 @@
+#include "auth.hpp"
+
+#include <openssl/crypto.h>
+#include <openssl/rand.h>
+#include <openssl/sha.h>
+
+#include <array>
+#include <cctype>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <stdexcept>
+#include <sys/stat.h>
+
+AuthStore::AuthStore(const std::string& file) : path(file) {
+    std::ifstream input(path);
+    std::string username, hash;
+
+    while (input >> username >> hash) {
+        if (valid_username(username) && hash.size() == 64)
+            users[username] = hash;
+    }
+
+    if (std::filesystem::exists(path))
+        chmod(path.c_str(), 0600);
+}
+
+bool AuthStore::valid_username(const std::string& username) {
+    if (username.size() < 3 || username.size() > 24)
+        return false;
+
+    for (unsigned char c : username) {
+        if (!std::isalnum(c) && c != 95 && c != 45 && c != 46)
+            return false;
+    }
+    return true;
+}
+
+std::string AuthStore::hash_key(const std::string& key) {
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char*>(key.data()),
+           key.size(), digest);
+
+    std::ostringstream output;
+    output << std::hex << std::setfill(static_cast<char>(48));
+
+    for (unsigned char byte : digest)
+        output << std::setw(2) << static_cast<unsigned int>(byte);
+
+    return output.str();
+}
+
+void AuthStore::save_locked() const {
+    const std::string temporary = path + ".tmp";
+    std::ofstream output(temporary, std::ios::trunc);
+
+    if (!output)
+        throw std::runtime_error("Cannot write user database");
+
+    for (const auto& entry : users)
+        output << entry.first << " " << entry.second << "\n";
+
+    output.flush();
+    if (!output)
+        throw std::runtime_error("User database write failed");
+
+    output.close();
+    chmod(temporary.c_str(), 0600);
+
+    if (std::rename(temporary.c_str(), path.c_str()) != 0)
+        throw std::runtime_error("Cannot replace user database");
+
+    chmod(path.c_str(), 0600);
+}
+
+bool AuthStore::register_user(
+    const std::string& username, std::string& ckey
+) {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    if (!valid_username(username) || users.count(username))
+        return false;
+
+    std::array<unsigned char, 32> random_bytes{};
+
+    if (RAND_bytes(random_bytes.data(),
+                   static_cast<int>(random_bytes.size())) != 1)
+        throw std::runtime_error("Secure CKey generation failed");
+
+    std::ostringstream token;
+    token << std::hex << std::setfill(static_cast<char>(48));
+
+    for (unsigned char byte : random_bytes)
+        token << std::setw(2) << static_cast<unsigned int>(byte);
+
+    ckey = token.str();
+    users[username] = hash_key(ckey);
+
+    try {
+        save_locked();
+    } catch (...) {
+        users.erase(username);
+        ckey.clear();
+        throw;
+    }
+
+    return true;
+}
+
+bool AuthStore::authenticate(
+    const std::string& username, const std::string& ckey
+) const {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    auto found = users.find(username);
+    if (found == users.end() || ckey.size() != 64)
+        return false;
+
+    std::string supplied = hash_key(ckey);
+
+    return CRYPTO_memcmp(
+        found->second.data(), supplied.data(), supplied.size()
+    ) == 0;
+}

@@ -15,6 +15,7 @@ set(CIPHERAPI_INCLUDE_DIRS
 add_library(cipher_core STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/library.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/profile.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/auth.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/image.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/video.cpp"
 )
@@ -27,3 +28,11 @@ target_link_libraries(cipher_client PRIVATE cipher_core)
 
 add_executable(cipher_server "${CMAKE_CURRENT_SOURCE_DIR}/src/server.cpp")
 target_link_libraries(cipher_server PRIVATE cipher_core)
+
+
+# Python SDK shared library
+set_target_properties(cipher_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+add_library(cipherapi SHARED src/api.cpp)
+target_include_directories(cipherapi PUBLIC ${CIPHERAPI_INCLUDE_DIRS})
+target_link_libraries(cipherapi PRIVATE cipher_core)

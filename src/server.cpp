@@ -213,7 +213,7 @@ static void transmit_video(
     if (!c->connected)
         throw std::runtime_error("Client disconnected");
 
-    CipherVideo::send_file(c->fd, libraries, path, sha);
+    CipherVideo::send_file(c->fd, libraries, path, sha, false);
 }
 
 static void show_clients() {

@@ -210,7 +210,7 @@ int capi_client_send_video(CAPIClient* client, const char* path, int checksum) {
         std::lock_guard<std::mutex> lock(client->send_mutex);
 
         CipherVideo::send_file(
-            client->fd, *client->libraries, path, checksum != 0
+            client->fd, *client->libraries, path, checksum != 0, false
         );
 
         last_error.clear();

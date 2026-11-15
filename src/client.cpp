@@ -113,11 +113,11 @@ static void transmit_raw_image(int fd, Neon::Stats& stats,
 
 static void transmit_video(int fd, const LibraryManager& libraries,
                            Neon::Stats& stats, const std::string& path,
-                           bool use_sha256) {
+                           bool use_sha256, bool fast_mode) {
     const auto start = std::chrono::steady_clock::now();
 
     auto result = CipherVideo::send_file(
-        fd, libraries, path, use_sha256
+        fd, libraries, path, use_sha256, fast_mode
     );
 
     const auto end = std::chrono::steady_clock::now();
@@ -340,7 +340,7 @@ int main(int argc, char* argv[]) {
                     path = path.substr(1, path.size() - 2);
 
                 try {
-                    transmit_video(sock, libraries, stats, path, !no_sha);
+                    transmit_video(sock, libraries, stats, path, !no_sha, fast_mode);
                 } catch (const std::exception& e) {
                     Neon::error(e.what());
                 }

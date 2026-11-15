@@ -197,8 +197,10 @@ TransferStats send_file(
     int fd,
     const LibraryManager& libraries,
     const std::string& path,
-    bool use_sha256) {
+    bool use_sha256,
+    bool fast_mode) {
 
+    (void)fast_mode; // Reserved for future video fast-mode support.
     const fs::path source(path);
     const std::string filename = source.filename().string();
 

@@ -19,7 +19,8 @@ TransferStats send_file(
     int fd,
     const LibraryManager& libraries,
     const std::string& path,
-    bool use_sha256
+    bool use_sha256,
+    bool fast_mode
 );
 
 class Receiver {
@@ -37,6 +38,7 @@ private:
     const LibraryManager& libraries_;
     bool active_ = false;
     bool use_sha256_ = false;
+    bool fast_mode_ = false;
     std::uint64_t expected_size_ = 0;
     std::uint64_t received_size_ = 0;
     std::uint32_t expected_sequence_ = 0;

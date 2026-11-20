@@ -385,7 +385,12 @@ int capi_client_receive_event(
                 type >= CipherTransport::VIDEO_START &&
                 type <= CipherTransport::VIDEO_END
             ) {
-                output = client->video_receiver->handle(type, payload);
+                try {
+                    output = client->video_receiver->handle(type, payload);
+                } catch (...) {
+                    client->video_receiver->abort();
+                    throw;
+                }
 
                 if (output.empty())
                     continue;

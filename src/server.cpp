@@ -88,7 +88,6 @@ static void receive_client(
             if (!CipherTransport::receive_frame(c->fd, type, payload))
                 break;
 
-            ++c->stats.received_bytes;
             c->stats.received_bytes += payload.size();
 
             if (type == CipherTransport::TEXT) {

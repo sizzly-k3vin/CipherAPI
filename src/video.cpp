@@ -330,6 +330,10 @@ Receiver::~Receiver() {
     delete state_;
 }
 
+void Receiver::abort() noexcept {
+    abort_transfer();
+}
+
 void Receiver::abort_transfer() noexcept {
     if (state_ && state_->file.is_open())
         state_->file.close();
@@ -379,6 +383,11 @@ std::string Receiver::handle(
             payload.size() != 12 + name_length ||
             expected_size_ == 0) {
             throw std::runtime_error("Invalid video metadata");
+        }
+
+        if (expected_size_ > MAX_VIDEO_SIZE) {
+            expected_size_ = 0;
+            throw std::runtime_error("Video exceeds maximum transfer size (2 GiB)");
         }
 
         const std::string filename =

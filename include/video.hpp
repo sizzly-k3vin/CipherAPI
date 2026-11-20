@@ -8,6 +8,7 @@
 namespace CipherVideo {
 
 constexpr std::uint32_t CHUNK_SIZE = 4096;
+constexpr std::uint64_t MAX_VIDEO_SIZE = 2ULL * 1024 * 1024 * 1024;
 
 struct TransferStats {
     std::uint64_t original_bytes = 0;
@@ -33,6 +34,7 @@ public:
 
     // Returns the saved filename when VIDEO_END completes a transfer.
     std::string handle(std::uint8_t type, const std::string& payload);
+    void abort() noexcept;
 
 private:
     const LibraryManager& libraries_;

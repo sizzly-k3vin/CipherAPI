@@ -5,6 +5,7 @@
 #include "transport.hpp"
 #include "neon.hpp"
 #include "video.hpp"
+#include "auth.hpp"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -24,8 +25,11 @@
 #include <vector>
 
 struct Client {
-    int id;
+    int id;                         // Temporary connection ID
     int fd;
+    std::string user_id;            // Persistent authenticated UserID
+    std::string username;
+    std::atomic<bool> authenticated{false};
     std::atomic<bool> connected{true};
     std::atomic<bool> fast{false};
     Neon::Stats stats;

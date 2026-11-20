@@ -9,3 +9,7 @@ received_images/
 /build/
 *.bak
 received_images/
+
+# CipherAPI authentication data
+users.db
+users.db.tmp

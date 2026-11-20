@@ -11,6 +11,8 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <chrono>
+#include <climits>
 #include <cstring>
 #include <memory>
 #include <mutex>
@@ -40,18 +42,128 @@ static void set_error(const char* message) {
     last_error = message ? message : "Unknown CipherAPI error";
 }
 
-static int wait_readable(int fd, int timeout_ms) {
-    pollfd descriptor{fd, POLLIN, 0};
-    int result;
+class FrameTimeoutError : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
 
-    do {
-        result = poll(&descriptor, 1, timeout_ms);
-    } while (result < 0 && errno == EINTR);
+static bool wait_readable_until(
+    int fd, std::chrono::steady_clock::time_point deadline, bool infinite
+) {
+    while (true) {
+        int timeout = -1;
 
-    if (result < 0)
-        throw std::runtime_error("Socket poll failed");
+        if (!infinite) {
+            auto remaining = deadline - std::chrono::steady_clock::now();
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                remaining
+            ).count();
 
-    return result;
+            if (remaining > std::chrono::steady_clock::duration::zero() &&
+                ms == 0)
+                ms = 1;
+
+            if (ms < 0)
+                ms = 0;
+
+            timeout = ms > INT_MAX ? INT_MAX : static_cast<int>(ms);
+        }
+
+        pollfd descriptor{fd, POLLIN, 0};
+        int result = poll(&descriptor, 1, timeout);
+
+        if (result < 0 && errno == EINTR)
+            continue;
+
+        if (result < 0)
+            throw std::runtime_error("Socket poll failed");
+
+        if (result == 0)
+            return false;
+
+        if (descriptor.revents & POLLNVAL)
+            throw std::runtime_error("Invalid socket descriptor");
+
+        return true;
+    }
+}
+
+static bool receive_exact_until(
+    int fd, void* data, size_t size,
+    std::chrono::steady_clock::time_point deadline,
+    bool infinite, bool allow_initial_timeout
+) {
+    char* ptr = static_cast<char*>(data);
+    size_t received = 0;
+
+    while (received < size) {
+        if (!wait_readable_until(fd, deadline, infinite)) {
+            if (received == 0 && allow_initial_timeout)
+                return false;
+
+            throw FrameTimeoutError(
+                "Receive timed out during an incomplete frame"
+            );
+        }
+
+        ssize_t n = recv(
+            fd, ptr + received, size - received, MSG_DONTWAIT
+        );
+
+        if (n < 0 && errno == EINTR)
+            continue;
+
+        if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+            continue;
+
+        if (n == 0)
+            throw std::runtime_error("Server closed the connection");
+
+        if (n < 0)
+            throw std::runtime_error("TCP receive failed");
+
+        received += static_cast<size_t>(n);
+    }
+
+    return true;
+}
+
+static bool receive_frame_until(
+    int fd, uint8_t& type, std::string& payload,
+    std::chrono::steady_clock::time_point deadline, bool infinite
+) {
+    uint32_t network_length = 0;
+
+    if (!receive_exact_until(
+            fd, &type, sizeof(type), deadline, infinite, true
+        ))
+        return false;
+
+    receive_exact_until(
+        fd, &network_length, sizeof(network_length),
+        deadline, infinite, false
+    );
+
+    if (!CipherTransport::valid_type(type))
+        throw std::runtime_error("Unknown packet type");
+
+    uint32_t length = ntohl(network_length);
+
+    if (length > CipherTransport::frame_limit(type))
+        throw std::runtime_error("Incoming frame exceeds size limit");
+
+    if (type == CipherTransport::TEXT && length % 64 != 0)
+        throw std::runtime_error("Invalid encoded text frame");
+
+    payload.resize(length);
+
+    if (length) {
+        receive_exact_until(
+            fd, payload.data(), length, deadline, infinite, false
+        );
+    }
+
+    return true;
 }
 
 extern "C" {
@@ -237,17 +349,18 @@ int capi_client_receive_event(
 
         std::lock_guard<std::mutex> lock(client->receive_mutex);
 
+        const bool infinite_timeout = timeout_ms < 0;
+        const auto deadline = std::chrono::steady_clock::now() +
+            std::chrono::milliseconds(timeout_ms > 0 ? timeout_ms : 0);
+
         while (true) {
-            int ready = wait_readable(client->fd, timeout_ms);
-
-            if (ready == 0)
-                return -2;
-
             uint8_t type = 0;
             std::string payload;
 
-            if (!CipherTransport::receive_frame(client->fd, type, payload))
-                throw std::runtime_error("Server closed the connection");
+            if (!receive_frame_until(
+                    client->fd, type, payload, deadline, infinite_timeout
+                ))
+                return -2;
 
             int kind = 0;
             std::string output;
@@ -292,6 +405,14 @@ int capi_client_receive_event(
             last_error.clear();
             return static_cast<int>(output.size());
         }
+    } catch (const FrameTimeoutError& e) {
+        if (client && client->fd >= 0) {
+            shutdown(client->fd, SHUT_RDWR);
+            close(client->fd);
+            client->fd = -1;
+        }
+        set_error(e.what());
+        return -1;
     } catch (const std::exception& e) {
         set_error(e.what());
         return -1;

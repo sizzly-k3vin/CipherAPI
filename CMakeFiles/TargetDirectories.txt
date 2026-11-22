@@ -1,0 +1,9 @@
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipher_core.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipher_client.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipher_server.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipherapi.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipher_auth_test.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/cipher_transport_test.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/test.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/edit_cache.dir
+/data/data/com.termux/files/home/myapi/fr/CipherAPI/CMakeFiles/rebuild_cache.dir

@@ -13,34 +13,65 @@
 #include <sstream>
 #include <stdexcept>
 #include <sys/stat.h>
+#include <utility>
 
 AuthStore::AuthStore(const std::string& file) : path(file) {
-    std::ifstream input(path);
-    std::string username, first, second;
+    if (!std::filesystem::exists(path))
+        return;
 
-    while (input >> username >> first) {
+    std::ifstream input(path);
+    if (!input.is_open())
+        throw std::runtime_error("Cannot read user database");
+
+    const auto is_hex = [](const std::string& value) {
+        for (unsigned char c : value) {
+            if (!std::isxdigit(c))
+                return false;
+        }
+        return true;
+    };
+
+    std::unordered_map<std::string, UserRecord> loaded;
+    std::string username;
+    bool needs_migration = false;
+
+    while (input >> username) {
+        std::string first;
+        if (!(input >> first))
+            throw std::runtime_error("Malformed user database record");
+
         UserRecord record;
 
         if (first.size() == 64) {
             record.user_id = generate_user_id();
             record.ckey_hash = first;
+            needs_migration = true;
         } else {
             record.user_id = first;
             if (!(input >> record.ckey_hash))
-                break;
+                throw std::runtime_error("Malformed user database record");
         }
 
-        if (valid_username(username) &&
-            record.user_id.size() == 32 &&
-            record.ckey_hash.size() == 64) {
-            users[username] = record;
+        if (!valid_username(username) ||
+            record.user_id.size() != 32 ||
+            record.ckey_hash.size() != 64 ||
+            !is_hex(record.user_id) ||
+            !is_hex(record.ckey_hash)) {
+            throw std::runtime_error("Invalid user database record");
         }
+
+        if (!loaded.emplace(username, record).second)
+            throw std::runtime_error("Duplicate user in database");
     }
 
-    if (std::filesystem::exists(path)) {
-        chmod(path.c_str(), 0600);
+    if (input.bad())
+        throw std::runtime_error("Error reading user database");
+
+    users = std::move(loaded);
+    chmod(path.c_str(), 0600);
+
+    if (needs_migration)
         save_locked();
-    }
 }
 
 bool AuthStore::valid_username(const std::string& username) {

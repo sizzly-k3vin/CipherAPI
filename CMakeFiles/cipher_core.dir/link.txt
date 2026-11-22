@@ -1,0 +1,2 @@
+/data/data/com.termux/files/usr/bin/llvm-ar qc libcipher_core.a CMakeFiles/cipher_core.dir/src/library.cpp.o CMakeFiles/cipher_core.dir/src/profile.cpp.o CMakeFiles/cipher_core.dir/src/auth.cpp.o CMakeFiles/cipher_core.dir/src/image.cpp.o CMakeFiles/cipher_core.dir/src/video.cpp.o CMakeFiles/cipher_core.dir/src/commands.cpp.o
+/data/data/com.termux/files/usr/bin/llvm-ranlib libcipher_core.a

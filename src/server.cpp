@@ -1,3 +1,4 @@
+#include "commands.hpp"
 #include "debug.hpp"
 #include "library.hpp"
 #include "image.hpp"
@@ -327,11 +328,33 @@ int main() {
             if (line.empty())
                 continue;
 
-            std::istringstream input(line);
-            std::string command;
-            input >> command;
-
             try {
+                const auto parsed = CipherCommands::parse(line);
+                const std::string& command = parsed.name;
+                const auto& args = parsed.args;
+
+            const auto join_args = [&](std::size_t start) {
+                std::string result;
+                for (std::size_t i = start; i < args.size(); ++i) {
+                    if (!result.empty()) result += " ";
+                    result += args[i];
+                }
+                return result;
+            };
+
+            const auto parse_id = [&](std::size_t index, int& id) {
+                if (index >= args.size()) return false;
+                try {
+                    std::size_t used = 0;
+                    int value = std::stoi(args[index], &used);
+                    if (used != args[index].size()) return false;
+                    id = value;
+                    return true;
+                } catch (...) {
+                    return false;
+                }
+            };
+
                 if (command == "/help") {
                     std::cout
                         << "\n/help                 Show commands\n"
@@ -344,7 +367,7 @@ int main() {
                         << "/sendimg FILE         Send image\n"
                         << "/sendimg -f FILE      Send raw image\n"
                         << "/sendvid FILE         Send video\n"
-                        << "/sendvid -f FILE      Send video with SHA-256\n"
+                        << "/sendvid -f FILE      Send video without SHA-256\n"
                         << "/quit                 Disconnect selected client\n"
                         << "/shutdown             Stop server\n";
                 }
@@ -353,7 +376,7 @@ int main() {
                 }
                 else if (command == "/use") {
                     int id;
-                    if (!(input >> id)) {
+                    if (args.size() != 1 || !parse_id(0, id)) {
                         Neon::error("Usage: /use ID");
                         continue;
                     }
@@ -367,13 +390,12 @@ int main() {
                 }
                 else if (command == "/to") {
                     int id;
-                    if (!(input >> id)) {
+                    if (args.size() < 2 || !parse_id(0, id)) {
                         Neon::error("Usage: /to ID MESSAGE");
                         continue;
                     }
 
-                    std::string message;
-                    std::getline(input >> std::ws, message);
+                    std::string message = join_args(1);
 
                     auto c = find_client(id);
                     if (!c || message.empty()) {
@@ -384,8 +406,7 @@ int main() {
                     send_text(c, libraries, message);
                 }
                 else if (command == "/broadcast") {
-                    std::string message;
-                    std::getline(input >> std::ws, message);
+                    std::string message = join_args(0);
 
                     if (message.empty())
                         continue;
@@ -433,24 +454,20 @@ int main() {
                         continue;
                     }
 
-                    std::string option, path;
-                    input >> option;
+                    bool raw = !args.empty() && args[0] == "-f";
+                    std::size_t path_start = raw ? 1 : 0;
 
-                    bool raw = option == "-f";
-                    if (raw)
-                        input >> path;
-                    else
-                        path = option;
-
-                    if (path.empty()) {
+                    if (args.size() <= path_start) {
                         Neon::error("File path required");
                         continue;
                     }
 
+                    std::string path = join_args(path_start);
+
                     if (command == "/sendimg")
                         transmit_image(c, path, raw);
                     else
-                        transmit_video(c, libraries, path, raw);
+                        transmit_video(c, libraries, path, !raw);
                 }
                 else if (command == "/quit") {
                     auto c = find_client(selected_id);

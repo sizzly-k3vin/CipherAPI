@@ -18,6 +18,22 @@ inline constexpr const char* RED    = "\033[1;31m";
 inline constexpr const char* DIM    = "\033[2m";
 inline std::mutex output_mutex;
 
+inline std::string sanitize_terminal_text(const std::string& input) {
+    std::string output;
+    output.reserve(input.size());
+
+    for (unsigned char ch : input) {
+        if (ch == 10 || ch == 9) {
+            output.push_back(static_cast<char>(ch));
+        } else if (ch < 0x20 || ch == 0x7f) {
+            output.push_back(static_cast<char>(0x3f));
+        } else {
+            output.push_back(static_cast<char>(ch));
+        }
+    }
+    return output;
+}
+
 struct Stats {
     std::atomic<unsigned long long> sent_messages{0};
     std::atomic<unsigned long long> received_messages{0};
@@ -44,7 +60,7 @@ inline void log(const char* color, const char* tag,
     std::lock_guard<std::mutex> lock(output_mutex);
     std::cout << DIM << '[' << timestamp() << "] "
               << RESET << color << '[' << tag << "] "
-              << RESET << message << '\n';
+              << RESET << sanitize_terminal_text(message) << '\n';
     std::cout.flush();
 }
 
@@ -100,7 +116,7 @@ inline void print_message(const std::string& role,
                           const std::string& message) {
     std::lock_guard<std::mutex> lock(output_mutex);
     std::cout << '\n' << GREEN << '[' << role << "] "
-              << RESET << message << '\n';
+              << RESET << sanitize_terminal_text(message) << '\n';
     std::cout.flush();
 }
 
@@ -115,11 +131,15 @@ inline void help() {
         << "\n  CIPHERAPI COMMANDS\n"
         << "  ----------------------------------------\n"
         << RESET
-        << "  /help    Show this command list\n"
-        << "  /stats   Show session traffic statistics\n"
-        << "  /clear   Clear the terminal\n"
-        << "  /sendimg Send an image: /sendimg path/to/image.png\n"
-        << "  /quit    End the current session\n\n";
+        << "  /help             Show this command list\n"
+        << "  /stats            Show session traffic statistics\n"
+        << "  /clear            Clear the terminal\n"
+        << "  /fast             Toggle fast binary text mode\n"
+        << "  /sendimg FILE     Send an image\n"
+        << "  /sendimg -f FILE  Send a raw image\n"
+        << "  /sendvid FILE     Send video with SHA-256 cycling\n"
+        << "  /sendvid -f FILE  Send video without SHA-256 cycling\n"
+        << "  /quit             End the current session\n\n";
 }
 
 inline void show_stats(const Stats& s) {

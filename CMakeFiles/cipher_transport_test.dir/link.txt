@@ -1,0 +1,1 @@
+/data/data/com.termux/files/usr/bin/c++ -O2 -g -DNDEBUG -Xlinker --dependency-file=CMakeFiles/cipher_transport_test.dir/link.d CMakeFiles/cipher_transport_test.dir/tests/transport_test.cpp.o -o cipher_transport_test  libcipher_core.a /data/data/com.termux/files/usr/lib/libssl.so /data/data/com.termux/files/usr/lib/libcrypto.so

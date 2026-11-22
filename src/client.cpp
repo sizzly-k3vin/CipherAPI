@@ -1,3 +1,4 @@
+#include "commands.hpp"
 #include "debug.hpp"
 #include "library.hpp"
 #include "image.hpp"

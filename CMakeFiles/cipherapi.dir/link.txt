@@ -1,0 +1,1 @@
+/data/data/com.termux/files/usr/bin/c++ -fPIC -O2 -g -DNDEBUG -shared -Xlinker --dependency-file=CMakeFiles/cipherapi.dir/link.d -Wl,-soname,libcipherapi.so -o libcipherapi.so CMakeFiles/cipherapi.dir/src/api.cpp.o  libcipher_core.a /data/data/com.termux/files/usr/lib/libssl.so /data/data/com.termux/files/usr/lib/libcrypto.so

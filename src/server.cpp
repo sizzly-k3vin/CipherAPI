@@ -116,6 +116,7 @@ static void receive_client(
                 std::filesystem::create_directories(dir);
                 std::string path =
                     ImageLibrary::unpack(payload, dir.string());
+                ++c->stats.received_messages;
                 Neon::info("Image received: " + path);
             }
             else if (type == CipherTransport::RAW_IMAGE) {
@@ -124,13 +125,16 @@ static void receive_client(
                 std::filesystem::create_directories(dir);
                 std::string path =
                     ImageLibrary::unpack_raw(payload, dir.string());
+                ++c->stats.received_messages;
                 Neon::info("Raw image received: " + path);
             }
             else if (type >= CipherTransport::VIDEO_START &&
                      type <= CipherTransport::VIDEO_END) {
                 std::string result = video_receiver.handle(type, payload);
-                if (!result.empty())
+                if (!result.empty()) {
+                    ++c->stats.received_messages;
                     Neon::info("Video received: " + result);
+                }
             }
             else {
                 Neon::error("Unknown frame from client " +
@@ -216,7 +220,11 @@ static void transmit_video(
     if (!c->connected)
         throw std::runtime_error("Client disconnected");
 
-    CipherVideo::send_file(c->fd, libraries, path, sha, false);
+    const auto result =
+        CipherVideo::send_file(c->fd, libraries, path, sha, false);
+
+    ++c->stats.sent_messages;
+    c->stats.sent_bytes += result.wire_bytes;
 }
 
 static void show_clients() {

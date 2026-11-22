@@ -404,15 +404,20 @@ std::string Receiver::handle(
             }
         }
 
-        std::string candidate = "received_" + filename;
+        const fs::path output_dir = "received videos";
+        fs::create_directories(output_dir);
+
+        fs::path candidate = output_dir / ("received_" + filename);
         unsigned int suffix = 1;
 
-        while (fs::exists(candidate) || fs::exists(candidate + ".part")) {
-            candidate = "received_" + filename + "." +
-                        std::to_string(suffix++);
+        while (fs::exists(candidate) ||
+               fs::exists(candidate.string() + ".part")) {
+            candidate = output_dir /
+                ("received_" + filename + "." +
+                 std::to_string(suffix++));
         }
 
-        final_path_ = candidate;
+        final_path_ = candidate.string();
         temporary_path_ = final_path_ + ".part";
 
         state_->file.open(

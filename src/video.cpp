@@ -5,6 +5,8 @@
 #include <openssl/rand.h>
 #include <openssl/crypto.h>
 
+#include <zstd.h>
+
 #include <algorithm>
 #include <array>
 #include <filesystem>
@@ -20,7 +22,7 @@ namespace fs = std::filesystem;
 namespace CipherVideo {
 namespace {
 
-constexpr std::uint8_t VERSION = 1;
+constexpr std::uint8_t VERSION = 2;
 constexpr std::size_t HASH_SIZE = 32;
 constexpr std::size_t CHUNK_HEADER_SIZE = 14;
 
@@ -168,6 +170,45 @@ std::string digest_final(EVP_MD_CTX* ctx) {
     return digest;
 }
 
+std::string compress_chunk(const std::string& input) {
+    std::string output(ZSTD_compressBound(input.size()), '\0');
+
+    const std::size_t result = ZSTD_compress(
+        output.data(), output.size(),
+        input.data(), input.size(), 3);
+
+    if (ZSTD_isError(result))
+        throw std::runtime_error(
+            std::string("Zstd compression failed: ") +
+            ZSTD_getErrorName(result));
+
+    output.resize(result);
+    return output;
+}
+
+std::string decompress_chunk(
+    const std::string& input, std::size_t expected_size) {
+
+    if (expected_size == 0 || expected_size > CHUNK_SIZE)
+        throw std::runtime_error("Invalid decompressed chunk size");
+
+    std::string output(expected_size, '\0');
+
+    const std::size_t result = ZSTD_decompress(
+        output.data(), output.size(),
+        input.data(), input.size());
+
+    if (ZSTD_isError(result))
+        throw std::runtime_error(
+            std::string("Zstd decompression failed: ") +
+            ZSTD_getErrorName(result));
+
+    if (result != expected_size)
+        throw std::runtime_error("Decompressed chunk size mismatch");
+
+    return output;
+}
+
 std::string safe_output_name(const std::string& name) {
     if (name.empty() || name.size() > 255 ||
         name == "." || name == ".." ||
@@ -240,7 +281,9 @@ TransferStats send_file(
         // VIDEO_START: version, flags, filename length, file size, filename.
         std::string start;
         start.push_back(static_cast<char>(VERSION));
-        start.push_back(static_cast<char>(use_sha256 ? 1 : 0));
+        const std::uint8_t flags =
+            (use_sha256 ? 1u : 0u) | (fast_mode ? 2u : 0u);
+        start.push_back(static_cast<char>(flags));
         put_u16(start, static_cast<std::uint16_t>(filename.size()));
         put_u64(start, file_size);
         start += filename;
@@ -266,26 +309,34 @@ TransferStats send_file(
                 digest_update(digest, bytes);
 
             std::uint64_t seed = 0;
-            if (RAND_bytes(
-                    reinterpret_cast<unsigned char*>(&seed),
-                    sizeof(seed)) != 1) {
-                throw std::runtime_error("Random seed generation failed");
+            std::string payload;
+
+            if (fast_mode) {
+                // Fast Mode: transmit original chunk bytes directly.
+                payload = bytes;
+            } else {
+                // Normal Mode: compress, convert, shuffle, and encode.
+                const std::string compressed = compress_chunk(bytes);
+
+                if (RAND_bytes(
+                        reinterpret_cast<unsigned char*>(&seed),
+                        sizeof(seed)) != 1) {
+                    throw std::runtime_error("Random seed generation failed");
+                }
+
+                const std::string bits = bytes_to_bits(compressed);
+                const std::string shuffled = shuffle_bits(bits, seed);
+                payload = libraries.encode(shuffled);
             }
 
-            const std::string bits = bytes_to_bits(bytes);
-            const std::string shuffled = shuffle_bits(bits, seed);
-
-            // The existing ten libraries encode the shuffled 0/1 characters.
-            const std::string encoded = libraries.encode(shuffled);
-
-            // VIDEO_DATA: sequence, seed, original byte count, encoded bits.
+            // VIDEO_DATA: sequence, seed, original byte count, payload.
             std::string packet;
-            packet.reserve(CHUNK_HEADER_SIZE + encoded.size());
+            packet.reserve(CHUNK_HEADER_SIZE + payload.size());
 
             put_u32(packet, sequence);
             put_u64(packet, seed);
             put_u16(packet, static_cast<std::uint16_t>(amount));
-            packet += encoded;
+            packet += payload;
 
             CipherTransport::send_frame(
                 fd, CipherTransport::VIDEO_DATA, packet);
@@ -348,6 +399,7 @@ void Receiver::abort_transfer() noexcept {
     received_size_ = 0;
     expected_sequence_ = 0;
     use_sha256_ = false;
+    fast_mode_ = false;
     final_path_.clear();
     temporary_path_.clear();
 
@@ -373,8 +425,8 @@ std::string Receiver::handle(
         const std::uint8_t flags =
             static_cast<std::uint8_t>(payload[1]);
 
-        if (flags > 1)
-            throw std::runtime_error("Invalid video checksum mode");
+        if ((flags & 0xFCu) != 0)
+            throw std::runtime_error("Invalid video transfer flags");
 
         const std::uint16_t name_length = get_u16(payload, 2);
         expected_size_ = get_u64(payload, 4);
@@ -393,7 +445,8 @@ std::string Receiver::handle(
         const std::string filename =
             safe_output_name(payload.substr(12, name_length));
 
-        use_sha256_ = flags == 1;
+        use_sha256_ = (flags & 1u) != 0;
+        fast_mode_ = (flags & 2u) != 0;
 
         if (use_sha256_) {
             state_->digest = EVP_MD_CTX_new();

@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ZSTD REQUIRED IMPORTED_TARGET libzstd)
 
 set(CIPHERAPI_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -22,7 +24,7 @@ add_library(cipher_core STATIC
 )
 
 target_include_directories(cipher_core PUBLIC ${CIPHERAPI_INCLUDE_DIRS})
-target_link_libraries(cipher_core PUBLIC OpenSSL::Crypto OpenSSL::SSL)
+target_link_libraries(cipher_core PUBLIC OpenSSL::Crypto OpenSSL::SSL PkgConfig::ZSTD)
 
 add_executable(cipher_client "${CMAKE_CURRENT_SOURCE_DIR}/src/client.cpp")
 target_link_libraries(cipher_client PRIVATE cipher_core)
